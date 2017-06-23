@@ -1,6 +1,5 @@
 package controllers;
 
-import mongo.MorphiaHelper;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.index;
@@ -16,7 +15,6 @@ public class HomeController extends Controller {
    * <code>GET</code> request with a path of <code>/</code>.
    */
   public Result index() {
-    MorphiaHelper.getDatastore();
-    return ok(index.render("Your new application is ready haha asdfasdf."));
+    return ok(index.render("Your new application is ready."));
   }
 }
