@@ -34,7 +34,6 @@ public class CountController extends Controller {
     return ok(Integer.toString(counter.nextCount()));
   }
 
-
   public Result addTweet() {
     Tweet tweet = new Tweet();
     tweet.setName(Integer.toString(counter.nextCount()));
