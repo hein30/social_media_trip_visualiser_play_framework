@@ -24,8 +24,6 @@ public class Module extends AbstractModule {
         // Ask Guice to create an instance of ApplicationTimer when the
         // application starts.
         bind(ApplicationTimer.class).asEagerSingleton();
-        // Set AtomicCounter as the implementation for Counter.
-        bind(Counter.class).to(AtomicCounter.class);
     }
 
 }

@@ -7,6 +7,7 @@ import models.tweets.Tweet;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import services.AtomicCounter;
 import services.Counter;
 
 /**
@@ -20,7 +21,7 @@ public class CountController extends Controller {
   private final Counter counter;
 
   @Inject
-  public CountController(Counter counter) {
+  public CountController(AtomicCounter counter) {
     this.counter = counter;
   }
 
