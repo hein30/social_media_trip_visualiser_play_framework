@@ -10,31 +10,38 @@ import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.typesafe.config.ConfigFactory;
 
+import play.Logger;
+
 public class MorphiaHelper {
 
   private static final Datastore ds;
+  private static final Logger.ALogger LOGGER = Logger.of(MorphiaHelper.class);
 
   static {
     ds = initDatastore();
   }
 
-  private static Datastore initDatastore() {
-    Morphia morphia = new Morphia();
-    MongoClient mongoClient = new MongoClient(ConfigFactory.load().getString("mongodb.host"),
-        ConfigFactory.load().getInt("mongodb.port"));
-
-    MongoCredential cred = MongoCredential.createCredential("hein", "zz", "haha".toCharArray());
-
-    ServerAddress address = new ServerAddress("host", 123);
-
-    MongoClient anotherCl =
-        new MongoClient(Collections.singletonList(address), Collections.singletonList(cred));
-
-    return morphia.createDatastore(mongoClient, ConfigFactory.load().getString("mongodb.database"));
-  }
-
   private MorphiaHelper() {
     // private constructor. This is a singleton class.
+  }
+
+  private static Datastore initDatastore() {
+    final String mongoHost = ConfigFactory.load().getString("mongodb.host");
+    final int mongoPort = ConfigFactory.load().getInt("mongodb.port");
+    final String mongoDb = ConfigFactory.load().getString("mongodb.db");
+    final String mongoUser = ConfigFactory.load().getString("mongodb.user");
+    final String mongoPw = ConfigFactory.load().getString("mongodb.pw");
+
+    MongoCredential cred =
+        MongoCredential.createCredential(mongoUser, mongoDb, mongoPw.toCharArray());
+
+    ServerAddress address = new ServerAddress(mongoHost, mongoPort);
+
+    MongoClient client =
+        new MongoClient(Collections.singletonList(address), Collections.singletonList(cred));
+
+    Morphia morphia = new Morphia();
+    return morphia.createDatastore(client, mongoDb);
   }
 
   public static Datastore getDatastore() {
