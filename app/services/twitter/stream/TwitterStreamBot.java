@@ -10,12 +10,12 @@ import com.typesafe.config.ConfigFactory;
 
 import play.Logger;
 import play.inject.ApplicationLifecycle;
+import services.twitter.TwitterBot;
 import twitter4j.FilterQuery;
 import twitter4j.StatusListener;
 import twitter4j.TwitterException;
 import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
-import twitter4j.conf.ConfigurationBuilder;
 
 /**
  * Thread that will open a stream connection to twitter Api.
@@ -24,7 +24,7 @@ import twitter4j.conf.ConfigurationBuilder;
  */
 
 @Singleton
-public class TwitterStreamBot {
+public class TwitterStreamBot extends TwitterBot {
 
   private static final Logger.ALogger LOGGER = Logger.of(TwitterStreamBot.class);
 
@@ -36,8 +36,7 @@ public class TwitterStreamBot {
 
     LOGGER.info("Twitter stream bot started");
 
-    TwitterStreamFactory streamFactory =
-        new TwitterStreamFactory(getTwitterConfiguration().build());
+    TwitterStreamFactory streamFactory = new TwitterStreamFactory(buildConfig());
 
     TwitterStream stream = streamFactory.getInstance();
 
@@ -50,23 +49,6 @@ public class TwitterStreamBot {
     addFilter(stream);
 
     addStopHook(applicationLifecycle, statusListener);
-  }
-
-  private ConfigurationBuilder getTwitterConfiguration() {
-    final String consumerKey = ConfigFactory.load().getString("twitter.consumerKey");
-    final String consumerKeySecret = ConfigFactory.load().getString("twitter.consumerKeySecret");
-    final String accessToken = ConfigFactory.load().getString("twitter.accessToken");
-    final String accessTokenSecret = ConfigFactory.load().getString("twitter.accessTokenSecret");
-
-    return new ConfigurationBuilder()
-
-        .setOAuthConsumerKey(consumerKey)
-
-        .setOAuthConsumerSecret(consumerKeySecret)
-
-        .setOAuthAccessToken(accessToken)
-
-        .setOAuthAccessTokenSecret(accessTokenSecret);
   }
 
   private void addFilter(TwitterStream stream) throws TwitterException {

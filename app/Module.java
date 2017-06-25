@@ -3,6 +3,7 @@ import java.time.Clock;
 import com.google.inject.AbstractModule;
 
 import services.ApplicationTimer;
+import services.twitter.rest.TwitterRestBot;
 import services.twitter.stream.TwitterStreamBot;
 
 /**
@@ -25,6 +26,8 @@ public class Module extends AbstractModule {
 
     // Start the TwitterStreamBot class
     bind(TwitterStreamBot.class).asEagerSingleton();
+
+    bind(TwitterRestBot.class).asEagerSingleton();
   }
 
 }
