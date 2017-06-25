@@ -1,4 +1,4 @@
-package models.tweets;
+package models.trip;
 
 /**
  * Created by Hein Min Htike on 6/23/2017.

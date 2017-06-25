@@ -2,6 +2,9 @@ import java.time.Clock;
 
 import com.google.inject.AbstractModule;
 
+import actors.twitter.TweetProcessorActor;
+import play.libs.akka.AkkaGuiceSupport;
+import services.ActorsScheduler;
 import services.ApplicationTimer;
 import services.twitter.rest.TwitterRestBot;
 import services.twitter.stream.TwitterStreamBot;
@@ -14,16 +17,19 @@ import services.twitter.stream.TwitterStreamBot;
  * modules in other locations by adding `play.modules.enabled` settings to the `application.conf`
  * configuration file.
  */
-public class Module extends AbstractModule {
+public class Module extends AbstractModule implements AkkaGuiceSupport {
 
   @Override
   public void configure() {
+    bindActor(TweetProcessorActor.class, "tweet-processor-actor");
+
     // Use the system clock as the default implementation of Clock
     bind(Clock.class).toInstance(Clock.systemDefaultZone());
     // Ask Guice to create an instance of ApplicationTimer when the
     // application starts.
     bind(ApplicationTimer.class).asEagerSingleton();
 
+    bind(ActorsScheduler.class).asEagerSingleton();
     // Start the TwitterStreamBot class
     bind(TwitterStreamBot.class).asEagerSingleton();
 
