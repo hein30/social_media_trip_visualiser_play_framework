@@ -33,9 +33,5 @@ public class TwitterRestBot extends TwitterBot {
     Paging paging = new Paging();
     paging.setCount(1000);
     ResponseList<Status> list = twitter.getUserTimeline("MarshaMilan", paging);
-
-    System.out.println("");
-
-
   }
 }

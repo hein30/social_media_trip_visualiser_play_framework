@@ -1,5 +1,6 @@
 package services.twitter;
 
+import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import twitter4j.conf.Configuration;
@@ -14,10 +15,11 @@ import twitter4j.conf.ConfigurationBuilder;
 public abstract class TwitterBot {
 
   protected Configuration buildConfig() {
-    final String consumerKey = ConfigFactory.load().getString("twitter.consumerKey");
-    final String consumerKeySecret = ConfigFactory.load().getString("twitter.consumerKeySecret");
-    final String accessToken = ConfigFactory.load().getString("twitter.accessToken");
-    final String accessTokenSecret = ConfigFactory.load().getString("twitter.accessTokenSecret");
+    final Config config = ConfigFactory.load();
+    final String consumerKey = config.getString("twitter.consumerKey");
+    final String consumerKeySecret = config.getString("twitter.consumerKeySecret");
+    final String accessToken = config.getString("twitter.accessToken");
+    final String accessTokenSecret = config.getString("twitter.accessTokenSecret");
 
     return new ConfigurationBuilder()
 

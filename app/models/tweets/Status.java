@@ -2,6 +2,7 @@ package models.tweets;
 
 import java.util.Date;
 
+import models.trip.GeoLocation;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
@@ -21,7 +22,8 @@ public class Status {
   private String screenName;
   private Date createdAt;
   private GeoLocation geoLocation;
-  private boolean isGeoEnabled;
+  private boolean endPointUsed;
+  private boolean startPointUsed;
 
   public Status() {
     // default constructor
@@ -33,7 +35,6 @@ public class Status {
     this.screenName = String.valueOf(status.getUser().getScreenName());
     this.createdAt = status.getCreatedAt();
     this.geoLocation = new GeoLocation(status.getGeoLocation());
-    this.isGeoEnabled = status.getUser().isGeoEnabled();
   }
 
   public void save() {
@@ -80,11 +81,19 @@ public class Status {
     this.geoLocation = geoLocation;
   }
 
-  public boolean isGeoEnabled() {
-    return isGeoEnabled;
+  public boolean isEndPointUsed() {
+    return endPointUsed;
   }
 
-  public void setGeoEnabled(boolean geoEnabled) {
-    isGeoEnabled = geoEnabled;
+  public void setEndPointUsed(boolean endPointUsed) {
+    this.endPointUsed = endPointUsed;
+  }
+
+  public boolean isStartPointUsed() {
+    return startPointUsed;
+  }
+
+  public void setStartPointUsed(boolean startPointUsed) {
+    this.startPointUsed = startPointUsed;
   }
 }
