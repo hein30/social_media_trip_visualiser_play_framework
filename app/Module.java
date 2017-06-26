@@ -6,7 +6,7 @@ import actors.twitter.TweetProcessorActor;
 import play.libs.akka.AkkaGuiceSupport;
 import services.ActorsScheduler;
 import services.ApplicationTimer;
-import services.twitter.rest.TwitterRestBot;
+import services.twitter.rest.TwitterRestfulActor;
 import services.twitter.stream.TwitterStreamBot;
 
 /**
@@ -22,6 +22,7 @@ public class Module extends AbstractModule implements AkkaGuiceSupport {
   @Override
   public void configure() {
     bindActor(TweetProcessorActor.class, "tweet-processor-actor");
+    bindActor(TwitterRestfulActor.class, "twitter-restful-bot-actor");
 
     // Use the system clock as the default implementation of Clock
     bind(Clock.class).toInstance(Clock.systemDefaultZone());
@@ -33,7 +34,6 @@ public class Module extends AbstractModule implements AkkaGuiceSupport {
     // Start the TwitterStreamBot class
     bind(TwitterStreamBot.class).asEagerSingleton();
 
-    bind(TwitterRestBot.class).asEagerSingleton();
   }
 
 }
