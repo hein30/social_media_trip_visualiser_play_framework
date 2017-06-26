@@ -7,6 +7,8 @@ GET     /                           controllers.HomeController.index
 
 GET     /map                        controllers.HomeController.map
 
+GET     /usersFromTweets            controllers.HomeController.usersFromTweets
+
 # An example controller showing how to use dependency injection
 GET     /count                      controllers.CountController.count
 GET     /tweet                      controllers.CountController.addTweet
@@ -16,7 +18,6 @@ GET     /message                    controllers.AsyncController.message
 GET     /messageSync                controllers.AsyncController.messageSync
 
 GET     /tweet/total                controllers.DataController.tweetTotal
-GET     /tweet/trip/total           controllers.DataController.tweetTripTotal
 GET     /tweet/trip                 controllers.DataController.tweetTrips
 
 GET     /tweet/processor/status     controllers.DataController.processorStatus

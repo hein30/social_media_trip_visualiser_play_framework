@@ -1,5 +1,8 @@
 package models.tweets;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.mongodb.morphia.annotations.Id;
 
 import mongo.MorphiaHelper;
@@ -10,19 +13,30 @@ import mongo.MorphiaHelper;
  * @author Hein Min Htike
  */
 
-public class SocialNetworkUser {
+public abstract class SocialNetworkUser {
 
   @Id
   private String id;
   private String userName;
+  private List<BoundingBox> boundingBoxes;
 
   public SocialNetworkUser() {
     // default constructor for morphia.
+    boundingBoxes = new ArrayList<BoundingBox>();
   }
 
+  // save new user only if we don't have this user in database.
   public void save() {
+    if (!existsInDatabase()) {
+      MorphiaHelper.getDatastore().save(this);
+    }
+  }
+
+  public void update() {
     MorphiaHelper.getDatastore().save(this);
   }
+
+  public abstract boolean existsInDatabase();
 
   public String getId() {
     return id;
@@ -38,5 +52,13 @@ public class SocialNetworkUser {
 
   public void setUserName(String userName) {
     this.userName = userName;
+  }
+
+  public List<BoundingBox> getBoundingBoxes() {
+    return boundingBoxes;
+  }
+
+  public void setBoundingBoxes(List<BoundingBox> boundingBoxes) {
+    this.boundingBoxes = boundingBoxes;
   }
 }
