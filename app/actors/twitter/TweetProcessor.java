@@ -74,10 +74,10 @@ class TweetProcessor {
     if (validStatues && validTimeWindow) {
       final double distance = distanceInMeter(start.getGeoLocation(), end.getGeoLocation());
       if (distance > 100) {
+        updateStatuses(start, end);
+
         Trip trip = new TwitterTrip(start, end, distance);
         trip.save();
-
-        updateStatuses(start, end);
       } else {
         updateStatuses(start, end);
       }
