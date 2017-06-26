@@ -27,7 +27,7 @@ import twitter4j.TwitterFactory;
 /**
  * Created by Hein Min Htike on 6/23/2017.
  */
-public class TwitterRestBot extends TwitterBot {
+class TwitterRestBot extends TwitterBot {
 
   private static final Logger.ALogger LOGGER = Logger.of(TwitterRestBot.class);
   private static final List<Double> POINTS_LIST =
@@ -38,11 +38,11 @@ public class TwitterRestBot extends TwitterBot {
 
   private final Twitter twitter;
 
-  public TwitterRestBot() throws TwitterException {
+  public TwitterRestBot() {
     twitter = new TwitterFactory(buildConfig()).getInstance();
   }
 
-  public static void main(String[] args) throws TwitterException {
+  public static void main(String[] args) {
     TwitterRestBot bot = new TwitterRestBot();
     bot.processUsers();
   }
@@ -79,16 +79,28 @@ public class TwitterRestBot extends TwitterBot {
   }
 
   private void saveTweetsForUser(TwitterUser user) throws TwitterException, RateLimitException {
-    ResponseList<Status> allStatuses = getTweets(user);
+    try {
+      ResponseList<Status> allStatuses = getTweets(user);
 
-    saveTweets(allStatuses);
+      int saved = saveTweets(allStatuses);
 
-    updateUser(user, allStatuses);
+      updateUser(user, allStatuses);
 
-    final RateLimitStatus rateLimitStatus = allStatuses.getRateLimitStatus();
-    if (rateLimitStatus != null && rateLimitStatus.getRemaining() < 1) {
-      throw new RateLimitException(
-          "Rate limit reached. Reset in " + rateLimitStatus.getSecondsUntilReset() + " seconds.");
+      LOGGER.debug("Saved {} tweets for user: {}", saved, user.getUserName());
+      final RateLimitStatus rateLimitStatus = allStatuses.getRateLimitStatus();
+      if (rateLimitStatus != null && rateLimitStatus.getRemaining() < 1) {
+        throw new RateLimitException(
+            "Rate limit reached. Reset in " + rateLimitStatus.getSecondsUntilReset() + " seconds.");
+      }
+
+    } catch (TwitterException e) {
+      if (e.getMessage().contains("401") || e.getMessage().contains("404")) {
+        LOGGER.error("Error occurred: ", e);
+        user.setNextProcessTime(DateUtils.addDays(new Date(), 2));
+        user.update();
+      } else {
+        throw e;
+      }
     }
   }
 
@@ -98,12 +110,14 @@ public class TwitterRestBot extends TwitterBot {
     user.update();
   }
 
-  private void saveTweets(ResponseList<Status> allStatuses) {
+  private int saveTweets(ResponseList<Status> allStatuses) {
     List<Status> statusesToSave = allStatuses.stream().filter(s -> useTweet(s, new TwitterUser()))
         .collect(Collectors.toList());
 
     statusesToSave.stream().map(models.tweets.Status::new).collect(Collectors.toList())
         .forEach(s -> s.save());
+
+    return statusesToSave.size();
   }
 
   private ResponseList<Status> getTweets(TwitterUser user) throws TwitterException {

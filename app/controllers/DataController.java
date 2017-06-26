@@ -22,6 +22,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import scala.compat.java8.FutureConverters;
 import scala.concurrent.Future;
+import services.twitter.rest.TwitterRestfulActorProtocol;
 
 
 /**
@@ -32,10 +33,14 @@ import scala.concurrent.Future;
 public class DataController extends Controller {
 
   public static final Datastore DS = MorphiaHelper.getDatastore();
-  private ActorRef tweetProcessor;
+  private final ActorRef tweetProcessor;
+
+  private final ActorRef twitterResfulActor;
 
   @Inject
-  public DataController(@Named("tweet-processor-actor") ActorRef tweetProcessor) {
+  public DataController(@Named("tweet-processor-actor") ActorRef tweetProcessor,
+      @Named("twitter-restful-bot-actor") ActorRef twitterResfulActor) {
+    this.twitterResfulActor = twitterResfulActor;
     this.tweetProcessor = tweetProcessor;
   }
 
@@ -80,6 +85,25 @@ public class DataController extends Controller {
 
   public CompletionStage<Result> processorRun() {
     Future<Object> response = ask(tweetProcessor, new TweetProcessorProtocol.RunActor(true), 30000);
+    return FutureConverters.toJava(response)
+
+        .thenApply(r -> ok("Your are run number: " + (int) r))
+
+        .exceptionally(
+            r -> badRequest("Your request not served as a tweet processor is already running."));
+  }
+
+  public CompletionStage<Result> restfulActorStatus() {
+    Future<Object> response =
+        ask(twitterResfulActor, new TwitterRestfulActorProtocol.ActorStatus(true), 1000);
+
+    return FutureConverters.toJava(response)
+        .thenApply(r -> ok("Number of runs for tweet processor: " + (int) r));
+  }
+
+  public CompletionStage<Result> restfulActorRun() {
+    Future<Object> response =
+        ask(twitterResfulActor, new TwitterRestfulActorProtocol.RunActor(true), 5000);
     return FutureConverters.toJava(response)
 
         .thenApply(r -> ok("Your are run number: " + (int) r))
