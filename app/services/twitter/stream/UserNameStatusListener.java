@@ -1,5 +1,10 @@
 package services.twitter.stream;
 
+import java.util.List;
+
+import com.typesafe.config.ConfigFactory;
+
+import models.tweets.TwitterUser;
 import play.Logger;
 import play.libs.Json;
 import twitter4j.StallWarning;
@@ -10,23 +15,24 @@ import twitter4j.StatusListener;
 /**
  * Basic implementation of @link {@link StatusListener}.
  *
- * Simply saves tweets into database if it has geo data.
+ * Simply saves {@link models.tweets.TwitterUser} into database if the users' tweets have geo
+ * location attached.
  * 
  * @author Hein Min Htike
  */
-public class PersistingStatusListener implements StatusListener {
+public class UserNameStatusListener implements StatusListener {
 
-  private static final Logger.ALogger LOGGER = Logger.of(PersistingStatusListener.class);
+  private static final Logger.ALogger LOGGER = Logger.of(UserNameStatusListener.class);
 
-  private int count;
+  private static final List<Double> POINTS_LIST =
+      ConfigFactory.load().getDoubleList("twitter.filter.coordinates");
 
   @Override
   public void onStatus(Status status) {
 
     if (status.getGeoLocation() != null) {
-      models.tweets.Status genericStatus = new models.tweets.Status(status);
-      genericStatus.save();
-      count++;
+      TwitterUser user = new TwitterUser(status, POINTS_LIST);
+      user.save();
     }
   }
 
@@ -53,13 +59,5 @@ public class PersistingStatusListener implements StatusListener {
   @Override
   public void onException(Exception ex) {
     LOGGER.error("Received exception: ", ex);
-  }
-
-  public int getCount() {
-    return count;
-  }
-
-  public void setCount(int count) {
-    this.count = count;
   }
 }

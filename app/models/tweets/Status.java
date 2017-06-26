@@ -2,10 +2,10 @@ package models.tweets;
 
 import java.util.Date;
 
-import models.trip.GeoLocation;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
+import models.trip.GeoLocation;
 import mongo.MorphiaHelper;
 
 /**

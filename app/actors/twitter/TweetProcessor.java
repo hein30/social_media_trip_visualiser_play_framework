@@ -58,13 +58,9 @@ class TweetProcessor {
   }
 
   private static void processEachUser(Map.Entry<String, List<Status>> oneMapEntry) {
-    // TODO create user before
-
     for (int i = 0; i < oneMapEntry.getValue().size() - 2; i++) {
       processAPair(oneMapEntry.getValue().get(i), oneMapEntry.getValue().get(i + 1));
     }
-
-    // TODO save user
   }
 
   private static void processAPair(Status start, Status end) {

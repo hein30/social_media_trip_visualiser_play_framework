@@ -8,12 +8,14 @@ import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
 
 import actors.twitter.TweetProcessorProtocol;
 import akka.actor.ActorRef;
 import models.trip.TwitterTrip;
 import models.tweets.Status;
+import models.tweets.TwitterUser;
 import mongo.MorphiaHelper;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -29,6 +31,7 @@ import scala.concurrent.Future;
  */
 public class DataController extends Controller {
 
+  public static final Datastore DS = MorphiaHelper.getDatastore();
   private ActorRef tweetProcessor;
 
   @Inject
@@ -37,13 +40,26 @@ public class DataController extends Controller {
   }
 
   public Result tweetTotal() {
-    return ok("Total number of tweets: "
-        + MorphiaHelper.getDatastore().getCollection(Status.class).count());
-  }
+    boolean totalTweets = Boolean.parseBoolean(
+        request().queryString().getOrDefault("totalTweets", new String[] {"false"})[0]);
+    boolean totalTrips = Boolean.parseBoolean(
+        request().queryString().getOrDefault("totalTrips", new String[] {"false"})[0]);
+    boolean totalUsers = Boolean.parseBoolean(
+        request().queryString().getOrDefault("totalUsers", new String[] {"false"})[0]);
 
-  public Result tweetTripTotal() {
-    return ok("Total number of trips from tweets: "
-        + MorphiaHelper.getDatastore().getCollection(TwitterTrip.class).count());
+    StringBuilder responseBuilder = new StringBuilder();
+    responseBuilder.append("Total number of tweets: " + DS.getCollection(Status.class).count());
+    responseBuilder.append(System.lineSeparator());
+
+    responseBuilder
+        .append("Total number of twitter trips: " + DS.getCollection(TwitterTrip.class).count());
+    responseBuilder.append(System.lineSeparator());
+
+    responseBuilder
+        .append("Total number of twitter users: " + DS.getCollection(TwitterUser.class).count());
+    responseBuilder.append(System.lineSeparator());
+
+    return ok(responseBuilder.toString());
   }
 
   public Result tweetTrips() {

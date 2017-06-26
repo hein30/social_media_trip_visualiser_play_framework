@@ -1,11 +1,11 @@
 package services.twitter.stream;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import play.Logger;
@@ -26,8 +26,9 @@ import twitter4j.TwitterStreamFactory;
 @Singleton
 public class TwitterStreamBot extends TwitterBot {
 
+  private static final Config CONFIG = ConfigFactory.load();
+  private static final List<Double> POINTS_LIST = CONFIG.getDoubleList("twitter.filter.coordinates");
   private static final Logger.ALogger LOGGER = Logger.of(TwitterStreamBot.class);
-
   private final ApplicationLifecycle applicationLifecycle;
 
   @Inject
@@ -43,7 +44,7 @@ public class TwitterStreamBot extends TwitterBot {
     LOGGER.info("User id: {}", stream.getId());
     LOGGER.info("User name: {}", stream.getScreenName());
 
-    StatusListener statusListener = new PersistingStatusListener();
+    StatusListener statusListener = new UserNameStatusListener();
     stream.addListener(statusListener);
 
     addFilter(stream);
@@ -58,15 +59,14 @@ public class TwitterStreamBot extends TwitterBot {
   }
 
   private void addLocationQuery(FilterQuery query) throws TwitterException {
-    List<Double> pointsList = ConfigFactory.load().getDoubleList("twitter.filter.coordinates");
 
-    if (pointsList.size() != 4) {
-      LOGGER.error("List of coordinates not in correct format: {}", pointsList);
+    if (POINTS_LIST.size() != 4) {
+      LOGGER.error("List of coordinates not in correct format: {}", POINTS_LIST);
       throw new TwitterException("Coordinates are fucked.");
     }
 
     final double[][] coordinates =
-        {{pointsList.get(0), pointsList.get(1)}, {pointsList.get(2), pointsList.get(3)}};
+        {{POINTS_LIST.get(0), POINTS_LIST.get(1)}, {POINTS_LIST.get(2), POINTS_LIST.get(3)}};
 
     query.locations(coordinates);
   }
@@ -74,9 +74,9 @@ public class TwitterStreamBot extends TwitterBot {
   private void addStopHook(ApplicationLifecycle applicationLifecycle,
       StatusListener statusListener) {
     applicationLifecycle.addStopHook(() -> {
-      LOGGER.info("Twitter stream bot closing. Number of tweets saved: {}.",
-          ((PersistingStatusListener) statusListener).getCount());
-      return CompletableFuture.completedFuture(null);
+      LOGGER.info("Twitter stream bot closing.");
+
+      return null;
     });
   }
 }
