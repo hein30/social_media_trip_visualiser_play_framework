@@ -114,7 +114,6 @@ public class DataController extends Controller {
 
   private Query<TwitterTrip> createTripQuery(boolean detailsRequested) {
     Query<TwitterTrip> query = MorphiaHelper.getDatastore().createQuery(TwitterTrip.class);
-    query.order("-endStatus.createdAt");
 
     // strip off details if not explicitly requested
     if (!detailsRequested) {
