@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Indexed;
 
 import models.trip.GeoLocation;
 import mongo.MorphiaHelper;
@@ -16,10 +17,15 @@ import mongo.MorphiaHelper;
 @Entity(value = "twitterStatues")
 public class Status {
 
+  static {
+    MorphiaHelper.ensureIndex(Status.class);
+  }
+
   @Id
   private String id;
   private String userId;
   private String screenName;
+  @Indexed
   private Date createdAt;
   private GeoLocation geoLocation;
   private boolean endPointUsed;

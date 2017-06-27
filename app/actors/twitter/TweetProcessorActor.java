@@ -70,7 +70,7 @@ public class TweetProcessorActor extends AbstractLoggingActor {
   private void processTweetsAsyncAndUpdateState(TweetProcessorProtocol.RunActor p) {
     Future<TweetProcessorProtocol.RunActor> future = Futures.future(() -> {
       TweetProcessor processor = new TweetProcessor();
-      processor.processTweets();
+      processor.startTweetProcessor();
       return p;
     }, getContext().dispatcher());
 
@@ -78,6 +78,10 @@ public class TweetProcessorActor extends AbstractLoggingActor {
       LOGGER.info("Processing tweets asynchronously completed.");
       getContext().become(IDLE);
       return s;
+    }).exceptionally(r -> {
+      LOGGER.error("Processing tweets asynchronously ran into problem.", r.getCause());
+      getContext().become(IDLE);
+      return null;
     });
   }
 }
