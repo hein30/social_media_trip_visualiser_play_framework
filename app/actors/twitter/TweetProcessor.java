@@ -23,16 +23,7 @@ class TweetProcessor {
   private static final Logger.ALogger LOGGER = Logger.of(TweetProcessor.class);
 
   public static void main(String args[]) {
-
-    LOGGER.info("Tweets processing started.");
-
-    long timeStarted = System.currentTimeMillis();
-
-    List<Status> statusList = createTwitterStatusQuery().asList();
-    processTweets(statusList);
-
-    long timeEnd = System.currentTimeMillis();
-    LOGGER.info("Time Taken: " + (timeEnd - timeStarted) / 1000 + " seconds.");
+    new TweetProcessor().startTweetProcessor();
   }
 
   private static void processTweets(List<Status> statusList) {
@@ -50,8 +41,8 @@ class TweetProcessor {
   private static Query<Status> createTwitterStatusQuery() {
     Query<Status> statusQuery = MorphiaHelper.getDatastore().createQuery(Status.class);
 
-    statusQuery.or(statusQuery.criteria("endPointUsed").notEqual(true),
-        statusQuery.criteria("startPointUsed").notEqual(true));
+    statusQuery.or(statusQuery.criteria("endPointUsed").equal(false),
+        statusQuery.criteria("startPointUsed").equal(false));
 
     statusQuery.order("createdAt");
     return statusQuery;
@@ -101,7 +92,15 @@ class TweetProcessor {
     return end.getCreatedAt().before(validEndDate);
   }
 
-  public void processTweets() {
-    TweetProcessor.main(new String[] {});
+  public void startTweetProcessor() {
+    LOGGER.info("Tweets processing started.");
+
+    long timeStarted = System.currentTimeMillis();
+
+    List<Status> statusList = createTwitterStatusQuery().asList();
+    processTweets(statusList);
+
+    long timeEnd = System.currentTimeMillis();
+    LOGGER.info("Time Taken: " + (timeEnd - timeStarted) / 1000 + " seconds.");
   }
 }

@@ -47,7 +47,7 @@ public class TwitterRestfulActor extends AbstractActor {
   private void runActor(TwitterRestfulActorProtocol.RunActor p) {
     totalRuns++;
     getContext().become(RUNNING);
-    LOGGER.info("TweetProcessorActor's runActor method started.");
+    LOGGER.info("TwitterRestfulActor's runActor method started.");
 
     runRestBotAsync(p);
 
@@ -70,9 +70,12 @@ public class TwitterRestfulActor extends AbstractActor {
     }, getContext().dispatcher());
 
     FutureConverters.toJava(future).thenApply(s -> {
-      LOGGER.info("Processing twitter users asynchronously completed.");
+      LOGGER.info("Running twitter rest bot asynchronously completed.");
       getContext().become(IDLE);
       return s;
+    }).exceptionally(e -> {
+      LOGGER.error("Something fucked up while running twitter rest bot.", e.getCause());
+      return null;
     });
   }
 }

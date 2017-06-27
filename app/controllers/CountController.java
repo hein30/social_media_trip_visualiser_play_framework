@@ -3,8 +3,6 @@ package controllers;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import models.tweets.Tweet;
-import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import services.AtomicCounter;
@@ -32,13 +30,5 @@ public class CountController extends Controller {
    */
   public Result count() {
     return ok(Integer.toString(counter.nextCount()));
-  }
-
-  public Result addTweet() {
-    Tweet tweet = new Tweet();
-    tweet.setName(Integer.toString(counter.nextCount()));
-
-    tweet.save();
-    return ok(Json.toJson(tweet.query()));
   }
 }

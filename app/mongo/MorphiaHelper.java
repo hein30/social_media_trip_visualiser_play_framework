@@ -48,4 +48,8 @@ public class MorphiaHelper {
     return ds;
   }
 
+  public static void ensureIndex(Class clazz) {
+    ds.ensureIndexes(clazz);
+  }
+
 }
