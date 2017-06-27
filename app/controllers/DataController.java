@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.mongodb.morphia.Datastore;
+import org.mongodb.morphia.query.FindOptions;
 import org.mongodb.morphia.query.Query;
 
 import actors.twitter.TweetProcessorProtocol;
@@ -71,7 +72,16 @@ public class DataController extends Controller {
     boolean detailsRequested = Boolean
         .parseBoolean(request().queryString().getOrDefault("details", new String[] {"false"})[0]);
 
-    List<TwitterTrip> trips = createTripQuery(detailsRequested).asList();
+    Query<TwitterTrip> tripQuery = createTripQuery(detailsRequested);
+    List<TwitterTrip> trips;
+    if (detailsRequested) {
+      trips = tripQuery.asList();
+      response().setHeader("Content-Disposition", "attachment; filename=twitter-trips.json");
+    } else {
+      final FindOptions options = new FindOptions();
+      options.limit(30_000);
+      trips = tripQuery.asList(options);
+    }
     return ok(Json.toJson(trips));
   }
 
