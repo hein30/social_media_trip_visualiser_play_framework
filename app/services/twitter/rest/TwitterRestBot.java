@@ -106,7 +106,9 @@ class TwitterRestBot extends TwitterBot {
 
   private void updateUser(TwitterUser user, ResponseList<Status> allStatuses) {
     user.setNextProcessTime(DateUtils.addDays(new Date(), 2));
-    user.setLastTweetId(String.valueOf(allStatuses.get(0).getId()));
+    if (!allStatuses.isEmpty()){
+      user.setLastTweetId(String.valueOf(allStatuses.get(0).getId()));
+    }
     user.update();
   }
 
