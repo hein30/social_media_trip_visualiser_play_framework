@@ -20,9 +20,13 @@ public class BoundingBoxTest {
 
   private BoundingBox bb;
 
+  public static BoundingBox londonBox() {
+    return new BoundingBox(-0.3515, 51.3849, 0.1483, 51.6723);
+  }
+
   @Before
   public void setUp() {
-    bb = new BoundingBox(-0.3515, 51.3849, 0.1483, 51.6723);
+    bb = londonBox();
   }
 
   @Test
@@ -39,8 +43,8 @@ public class BoundingBoxTest {
 
   @Test
   public void testGridSizeCalculations() {
-    assertEquals(689, bb.getHorizontalGridSize(50), 1e-4);
-    assertEquals(639, bb.getVerticalGridSize(50), 1e-4);
+    assertEquals(689, bb.getHorizontalGridSize(bb, 50), 1e-4);
+    assertEquals(639, bb.getVerticalGridSize(bb, 50), 1e-4);
   }
 
   @Test
@@ -84,14 +88,14 @@ public class BoundingBoxTest {
         final BoundingBox rightBox = row.get(i).getBoundingBox();
 
         assertEquals(leftBox.getSouthEast().getLatitude(), rightBox.getSouthWest().getLatitude(),
-            1e-3);
+            1e-6);
         assertEquals(leftBox.getSouthEast().getLongitude(), rightBox.getSouthWest().getLongitude(),
-            1e-3);
+            1e-6);
 
         assertEquals(leftBox.getNorthEast().getLatitude(), rightBox.getNorthWest().getLatitude(),
-            1e-3);
+            1e-6);
         assertEquals(leftBox.getNorthEast().getLongitude(), rightBox.getNorthWest().getLongitude(),
-            1e-3);
+            1e-6);
       }
     }
 
@@ -101,14 +105,14 @@ public class BoundingBoxTest {
       final BoundingBox topBox = rows.get(i).get(0).getBoundingBox();
 
       assertEquals(bottomBox.getNorthWest().getLongitude(), topBox.getSouthWest().getLongitude(),
-          1e-3);
+          1e-5);
       assertEquals(bottomBox.getNorthWest().getLatitude(), topBox.getSouthWest().getLatitude(),
-          1e-3);
+          1e-5);
 
       assertEquals(bottomBox.getNorthEast().getLongitude(), topBox.getSouthEast().getLongitude(),
-          1e-3);
+          1e-5);
       assertEquals(bottomBox.getNorthEast().getLatitude(), topBox.getSouthEast().getLatitude(),
-          1e-3);
+          1e-5);
     }
   }
 }

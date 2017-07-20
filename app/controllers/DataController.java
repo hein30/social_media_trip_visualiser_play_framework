@@ -81,7 +81,8 @@ public class DataController extends Controller {
       response().setHeader("Content-Disposition", "attachment; filename=twitter-trips.json");
     } else {
       final FindOptions options = new FindOptions();
-      options.limit(30_000);
+       options.limit(10);
+      tripQuery.field("distanceInMeter").greaterThan(10000);
       trips = tripQuery.asList(options);
     }
     return ok(Json.toJson(trips));

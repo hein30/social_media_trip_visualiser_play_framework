@@ -21,6 +21,13 @@ public class TwitterTrip extends Trip {
     super();
   }
 
+  public TwitterTrip(GeoLocation start, GeoLocation end) {
+    super();
+
+    setStartPoint(start);
+    setEndPoint(end);
+  }
+
   public TwitterTrip(Status startStatus, Status endStatus, double distance) {
     super();
 

@@ -28,6 +28,6 @@ public class MapController extends Controller {
 
     BoundingBox originalBox = Area.getAreaForName(area).getBoundingBox();
 
-    return ok(Json.toJson(originalBox.grids(numGrids, true)));
+    return ok(Json.toJson(originalBox.grids(numGrids, false)));
   }
 }
