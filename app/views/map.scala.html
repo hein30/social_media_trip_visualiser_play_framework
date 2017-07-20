@@ -19,20 +19,6 @@
 			min-height: 100%;
 		}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     </style>
 </head>
 </head>
@@ -58,34 +44,77 @@
 
 
 			function loadMarker() {
+			    var aggregateNodesOption = document.getElementById("checkBoxOption");
+			    var aggregate = aggregateNodesOption.checked
+
+			    var gridSizeSelector = document.getElementById("gridSizeSelector");
+			    var selectedGridSize = gridSizeSelector.options[gridSizeSelector.selectedIndex].value;
+
+                var areaSelector = document.getElementById("areaSelector");
+			    var selectedArea = areaSelector.options[areaSelector.selectedIndex].value;
+
 				var xhr = new XMLHttpRequest();
-				xhr.open("GET", "/tweet/trip", true);
+				xhr.open("GET", "/tweet/trip?aggregateNodes=" + aggregate + "&area=" + selectedArea +"&numGrids=" + selectedGridSize, true);
 				xhr.onreadystatechange = function () {
+
 					if(xhr.readyState == 4 && xhr.status == 200) {
-						var trips = JSON.parse(xhr.responseText);
 
-						for (var i = 0; i< trips.length; i++){
+						var response = JSON.parse(xhr.responseText);
 
-						    var lat1 = trips[i].startPoint.latitude;
-						    var lng1 = trips[i].startPoint.longitude;
-						    var lat2 = trips[i].endPoint.latitude;
-						    var lng2 = trips[i].endPoint.longitude;
+					    if(!aggregate){
 
-						    var flightPlanCoordinates = [
-                                {lat: lat1, lng: lng1},
-                                {lat: lat2, lng: lng2}
-                            ];
+				    		for (var i = 0; i< response.length; i++){
 
-                            var flightPath = new google.maps.Polyline({
-                            path: flightPlanCoordinates,
-                            geodesic: true,
-                            strokeColor: '#FF0000',
-                            strokeOpacity: .7,
-                            strokeWeight: 1
-                            });
+			    			    var lat1 = response[i].startPoint.latitude;
+		    				    var lng1 = response[i].startPoint.longitude;
+	    					    var lat2 = response[i].endPoint.latitude;
+    						    var lng2 = response[i].endPoint.longitude;
 
-                            flightPath.setMap(map);
-						}
+						        var flightPlanCoordinates = [
+                                    {lat: lat1, lng: lng1},
+                                    {lat: lat2, lng: lng2}
+                                ];
+
+                                var flightPath = new google.maps.Polyline({
+                                path: flightPlanCoordinates,
+                                geodesic: true,
+                                strokeColor: '#FF0000',
+                                strokeOpacity: .7,
+                                strokeWeight: 1
+                                });
+
+                                flightPath.setMap(map);
+						    }
+					    }else {
+					        var edgeList = response.edgeList;
+
+					        for (var i = 0; i< edgeList.length; i++){
+
+                                var edge = edgeList[i];
+					            var from = edge.from;
+					            var to = edge.to;
+
+					            var lat1 = from.grid.midPoint.latitude;
+		    				    var lng1 = from.grid.midPoint.longitude;
+	    					    var lat2 = to.grid.midPoint.latitude;
+    						    var lng2 = to.grid.midPoint.longitude;
+
+						        var flightPlanCoordinates = [
+                                    {lat: lat1, lng: lng1},
+                                    {lat: lat2, lng: lng2}
+                                ];
+
+                                var flightPath = new google.maps.Polyline({
+                                path: flightPlanCoordinates,
+                                geodesic: true,
+                                strokeColor: '#FF0000',
+                                strokeOpacity: 0.7,
+                                strokeWeight: edge.weight/50
+                                });
+
+                                flightPath.setMap(map);
+						    }
+					    }
 					}
 				}
 				xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -151,7 +180,6 @@
 
 
 
-
 </script>
 
 <button type="button" onclick="initialize()">Reset</button>
@@ -173,6 +201,8 @@
     <option>London</option>
     <option>Cardiff</option>
 </select>
+
+<input type="checkbox" id="checkBoxOption" value="true"> Aggregate nodes
 
 <div id="googleMap"></div>
 </body>

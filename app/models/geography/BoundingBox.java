@@ -109,7 +109,8 @@ public class BoundingBox {
     for (int row = 0; row < numGrids; row++) {
       GeoLocation newRowSW = getNewGeoLocation(calculator, currentSW, yDistance, 0);
 
-      grids.addAll(calculateGridsForOneRow(calculator, numGrids, xDistance, currentSW, newRowSW));
+      grids.addAll(
+          calculateGridsForOneRow(calculator, numGrids, xDistance, currentSW, newRowSW, row));
 
       currentSW = newRowSW;
     }
@@ -117,12 +118,12 @@ public class BoundingBox {
   }
 
   private List<Grid> calculateGridsForOneRow(GeodeticCalculator calculator, int numGrids,
-      double xDistance, GeoLocation currentSW, GeoLocation newRowSW) {
+      double xDistance, GeoLocation currentSW, GeoLocation newRowSW, int rowNum) {
     List<Grid> grids = new ArrayList<>();
 
     GeoLocation currentNE = newRowSW.clone();
-    grids.addAll(
-        calculateColumnGridsForThisRow(calculator, numGrids, xDistance, currentSW, currentNE));
+    grids.addAll(calculateColumnGridsForThisRow(calculator, numGrids, xDistance, currentSW,
+        currentNE, rowNum));
 
     return grids;
   }
@@ -141,14 +142,16 @@ public class BoundingBox {
    * @return
    */
   private List<Grid> calculateColumnGridsForThisRow(GeodeticCalculator calculator, int numGrids,
-      double xDistance, GeoLocation currentSW, GeoLocation currentNE) {
+      double xDistance, GeoLocation currentSW, GeoLocation currentNE, int rowNum) {
     List<Grid> grids = new ArrayList<>();
     for (int col = 0; col < numGrids; col++) {
       GeoLocation newLongitudeCoordinates = getNewGeoLocation(calculator, currentNE, xDistance, 90);
       GeoLocation newNE =
           new GeoLocation(currentNE.getLatitude(), newLongitudeCoordinates.getLongitude());
       BoundingBox bb = new BoundingBox(currentSW.clone(), newNE.clone());
-      grids.add(new Grid(bb));
+      Grid grid = new Grid(bb);
+      grid.setId("row:" + rowNum + " col:" + col);
+      grids.add(grid);
 
       currentNE = newNE;
       // currentSW = getNewGeoLocation(calculator, currentSW, xDistance, 90);

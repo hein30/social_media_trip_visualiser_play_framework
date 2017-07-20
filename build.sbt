@@ -28,6 +28,9 @@ libraryDependencies += "com.flickr4java" % "flickr4java" % "2.17"
 // https://mvnrepository.com/artifact/net.sf.opencsv/opencsv
 libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.3"
 
+// https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
+libraryDependencies += "org.apache.commons" % "commons-collections4" % "4.1"
+
 // https://mvnrepository.com/artifact/org.geotools/gt-main
 libraryDependencies += "org.geotools" % "gt-main" % "17.1"
 // https://mvnrepository.com/artifact/org.geotools/gt-referencing
@@ -39,5 +42,5 @@ resolvers += "Osgeo Repo" at "http://download.osgeo.org/webdav/geotools/"
 
 
 EclipseKeys.preTasks := Seq(compile in Compile)
-EclipseKeys.projectFlavor := EclipseProjectFlavor.Java         
+EclipseKeys.projectFlavor := EclipseProjectFlavor.Java
 EclipseKeys.createSrc := EclipseCreateSrc.ValueSet(EclipseCreateSrc.ManagedClasses, EclipseCreateSrc.ManagedResources)

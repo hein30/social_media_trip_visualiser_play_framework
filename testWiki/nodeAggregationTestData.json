@@ -111,20 +111,6 @@
 		"startStatus": null,
 		"endStatus": null
 	}, {
-		"id": "872118223113768960 872133792303120384",
-		"startPoint": {
-			"latitude": 51.41666667,
-			"longitude": -0.03333333
-		},
-		"endPoint": {
-			"latitude": 51.50711486,
-			"longitude": -0.12731805
-		},
-		"distanceInMeter": 11981.040050020398,
-		"area": "LONDON",
-		"startStatus": null,
-		"endStatus": null
-	}, {
 		"id": "884814613799288832 884820280606117889",
 		"startPoint": {
 			"latitude": 51.50711486,

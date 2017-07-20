@@ -9,12 +9,14 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.mongodb.morphia.Datastore;
-import org.mongodb.morphia.query.FindOptions;
 import org.mongodb.morphia.query.Query;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import actors.twitter.TweetProcessorProtocol;
 import akka.actor.ActorRef;
 import models.geography.Area;
+import models.graph.ResultGraph;
 import models.trip.TwitterTrip;
 import models.tweets.Status;
 import models.tweets.TwitterUser;
@@ -24,6 +26,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import scala.compat.java8.FutureConverters;
 import scala.concurrent.Future;
+import services.aggregator.nodeAggregator.NodeAggregator;
 import services.twitter.rest.TwitterRestfulActorProtocol;
 
 
@@ -70,6 +73,34 @@ public class DataController extends Controller {
   }
 
   public Result tweetTrips() {
+    List<TwitterTrip> trips = getTwitterTrips();
+
+    boolean aggregateNodes = Boolean.parseBoolean(
+        request().queryString().getOrDefault("aggregateNodes", new String[] {"false"})[0]);
+
+    if (aggregateNodes) {
+      return aggregatedNodes();
+    }
+
+    return ok(Json.toJson(trips));
+  }
+
+  private Result aggregatedNodes() {
+    List<TwitterTrip> trips = getTwitterTrips();
+    String area = request().queryString().getOrDefault("area", new String[] {"London"})[0];
+    int numGrids =
+        Integer.parseInt(request().queryString().getOrDefault("numGrids", new String[] {"40"})[0]);
+
+    NodeAggregator aggregator = new NodeAggregator();
+    final ResultGraph graph = aggregator.aggregateNodes(Area.getAreaForName(area).getBoundingBox(),
+        numGrids, false, trips, false);
+    graph.stripData();
+
+    JsonNode node = Json.toJson(graph);
+    return ok(node);
+  }
+
+  private List<TwitterTrip> getTwitterTrips() {
     boolean detailsRequested = Boolean
         .parseBoolean(request().queryString().getOrDefault("details", new String[] {"false"})[0]);
     String area = request().queryString().getOrDefault("area", new String[] {"London"})[0];
@@ -80,12 +111,9 @@ public class DataController extends Controller {
       trips = tripQuery.asList();
       response().setHeader("Content-Disposition", "attachment; filename=twitter-trips.json");
     } else {
-      final FindOptions options = new FindOptions();
-       options.limit(10);
-      tripQuery.field("distanceInMeter").greaterThan(10000);
-      trips = tripQuery.asList(options);
+      trips = tripQuery.asList();
     }
-    return ok(Json.toJson(trips));
+    return trips;
   }
 
   public CompletionStage<Result> processorStatus() {
