@@ -2,8 +2,11 @@ package models.tweets;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.mongodb.morphia.annotations.Id;
+
+import com.google.common.collect.Lists;
 
 import mongo.MorphiaHelper;
 
@@ -60,5 +63,14 @@ public abstract class SocialNetworkUser {
 
   public void setBoundingBoxes(List<BoundingBox> boundingBoxes) {
     this.boundingBoxes = boundingBoxes;
+  }
+
+  protected List<BoundingBox> buildBoundingBoxes(List<Double> pointsList) {
+    return Lists.partition(pointsList, 4).stream().map(this::buildOneBoundingBox)
+        .collect(Collectors.toList());
+  }
+
+  protected BoundingBox buildOneBoundingBox(List<Double> box) {
+    return new BoundingBox(box.get(0), box.get(1), box.get(2), box.get(3));
   }
 }
