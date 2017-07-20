@@ -5,21 +5,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import models.geography.BoundingBox;
 import models.geography.Grid;
 import models.graph.Edge;
 import models.graph.Node;
+import models.graph.ResultGraph;
 import models.trip.GeoLocation;
 import models.trip.Trip;
 import play.Logger;
 
 /**
- * Agreegate nodes based on grids.
+ * Aggregate nodes based on grids.
  */
 public class NodeAggregator {
   private static final Logger.ALogger LOGGER = Logger.of(NodeAggregator.class);
 
+  public ResultGraph aggregateNodes(BoundingBox boundingBox, int numGrids, boolean extendedBox,
+      List<? extends Trip> trips, boolean isDirected) {
+    return aggregateNodes(boundingBox.grids(numGrids, extendedBox), trips, isDirected);
+  }
 
-  public Map<String, Edge> aggregateNodes(List<Grid> grids, List<? extends Trip> trips) {
+  public ResultGraph aggregateNodes(List<Grid> grids, List<? extends Trip> trips,
+      boolean isDirected) {
 
     Map<String, Node> nodeMap = new HashMap<>();
     Map<String, Edge> edgeMap = new HashMap<>();
@@ -28,23 +35,37 @@ public class NodeAggregator {
       Optional<Node> startNodeOptional = getNodeForLocation(grids, trip.getStartPoint());
       Optional<Node> endNodeOptional = getNodeForLocation(grids, trip.getEndPoint());
 
-      if (startNodeOptional.isPresent() && !endNodeOptional.isPresent()) {
-        Node startNode = startNodeOptional.get();
-        Node endNode = endNodeOptional.get();
+      if (startNodeOptional.isPresent() && endNodeOptional.isPresent()
+          && !startNodeOptional.get().getId().contentEquals(endNodeOptional.get().getId()))
 
-        nodeMap.computeIfAbsent(startNode.getId(), zz -> startNode)
-            .addStartPoint(trip.getStartPoint());
-        nodeMap.computeIfAbsent(endNode.getId(), a -> endNode).addEndPoint(trip.getEndPoint());
-
-        Edge edge = new Edge(nodeMap.get(startNode.getId()), nodeMap.get(endNode.getId()));
-        edgeMap.computeIfAbsent(edge.getId(), a -> edge).increseEdgeWeight();
-
-      } else {
-        LOGGER.error("Out of bound for location.");
+        updateOrAddEdge(isDirected, nodeMap, edgeMap, trip, startNodeOptional, endNodeOptional);
+      else {
+        LOGGER.warn("Out of bound for location or Start and end points in same grid.");
       }
     }
 
-    return edgeMap;
+    return new ResultGraph(nodeMap, edgeMap, grids);
+  }
+
+  private void updateOrAddEdge(boolean isDirected, Map<String, Node> nodeMap,
+      Map<String, Edge> edgeMap, Trip trip, Optional<Node> startNodeOptional,
+      Optional<Node> endNodeOptional) {
+
+    Node startNode = startNodeOptional.get();
+    Node endNode = endNodeOptional.get();
+
+    nodeMap.computeIfAbsent(startNode.getId(), zz -> startNode).addStartPoint(trip.getStartPoint());
+    nodeMap.computeIfAbsent(endNode.getId(), a -> endNode).addEndPoint(trip.getEndPoint());
+
+    Edge edge = new Edge(nodeMap.get(startNode.getId()), nodeMap.get(endNode.getId()));
+
+    // if this is un-directed graph, and edge does not exists already, we try the reverse edge.
+    if (!isDirected && !edgeMap.containsKey(edge.getId())) {
+      Edge reverseEdge = new Edge(nodeMap.get(endNode.getId()), nodeMap.get(startNode.getId()));
+      edgeMap.computeIfAbsent(reverseEdge.getId(), a -> reverseEdge).increseEdgeWeight();
+    } else {
+      edgeMap.computeIfAbsent(edge.getId(), a -> edge).increseEdgeWeight();
+    }
   }
 
   private Optional<Node> getNodeForLocation(List<Grid> grids, GeoLocation location) {

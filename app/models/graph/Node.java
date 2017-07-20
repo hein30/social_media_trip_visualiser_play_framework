@@ -13,6 +13,8 @@ public class Node {
 
   private String id;
   private Grid grid;
+  private GeoLocation centerLocation;
+  private GeoLocation averageLocation;
   private List<GeoLocation> locations;
   private int incoming;
   private int outgoing;
@@ -20,7 +22,8 @@ public class Node {
   public Node(Grid grid) {
     this.grid = grid;
     locations = new ArrayList<>();
-    setId(grid);
+    this.id = grid.getId();
+    this.centerLocation = grid.getMidPoint();
   }
 
   public void addStartPoint(GeoLocation start) {
@@ -31,13 +34,6 @@ public class Node {
   public void addEndPoint(GeoLocation end) {
     locations.add(end);
     incoming++;
-  }
-
-  private void setId(Grid grid) {
-    final GeoLocation southWest = grid.getBoundingBox().getSouthWest();
-    final GeoLocation northEast = grid.getBoundingBox().getNorthEast();
-    this.id = String.valueOf(southWest.getLatitude()) + String.valueOf(southWest.getLongitude())
-        + String.valueOf(northEast.getLatitude()) + String.valueOf(northEast.getLongitude());
   }
 
   public String getId() {
@@ -78,5 +74,21 @@ public class Node {
 
   public void setOutgoing(int outgoing) {
     this.outgoing = outgoing;
+  }
+
+  public GeoLocation getCenterLocation() {
+    return centerLocation;
+  }
+
+  public void setCenterLocation(GeoLocation centerLocation) {
+    this.centerLocation = centerLocation;
+  }
+
+  public GeoLocation getAverageLocation() {
+    return averageLocation;
+  }
+
+  public void setAverageLocation(GeoLocation averageLocation) {
+    this.averageLocation = averageLocation;
   }
 }
