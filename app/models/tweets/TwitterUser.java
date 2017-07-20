@@ -27,7 +27,7 @@ public class TwitterUser extends SocialNetworkUser {
   public TwitterUser(String id, String screenName, List<Double> pointsList) {
     setId(id);
     setUserName(screenName);
-    setBoundingBoxes(getBoundingBoxes(pointsList));
+    setBoundingBoxes(buildBoundingBoxes(pointsList));
     nextProcessTime = new Date();
   }
 
@@ -35,17 +35,8 @@ public class TwitterUser extends SocialNetworkUser {
     final User user = status.getUser();
     setId(String.valueOf((user.getId())));
     setUserName(user.getScreenName());
-    setBoundingBoxes(getBoundingBoxes(pointsList));
+    setBoundingBoxes(buildBoundingBoxes(pointsList));
     nextProcessTime = new Date();
-  }
-
-  private List<BoundingBox> getBoundingBoxes(List<Double> pointsList) {
-    return Lists.partition(pointsList, 4).stream().map(this::createBoundingBox)
-        .collect(Collectors.toList());
-  }
-
-  private BoundingBox createBoundingBox(List<Double> box) {
-    return new BoundingBox(box.get(0), box.get(1), box.get(2), box.get(3));
   }
 
   @Override
