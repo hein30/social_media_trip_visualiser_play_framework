@@ -2,6 +2,7 @@ package models.trip;
 
 import org.mongodb.morphia.annotations.Entity;
 
+import models.geography.Area;
 import models.tweets.Status;
 import mongo.MorphiaHelper;
 
@@ -10,12 +11,21 @@ import mongo.MorphiaHelper;
  */
 @Entity(value = "twitterTrips")
 public class TwitterTrip extends Trip {
-
+  static {
+    MorphiaHelper.ensureIndex(TwitterTrip.class);
+  }
   private Status startStatus;
   private Status endStatus;
 
   public TwitterTrip() {
     super();
+  }
+
+  public TwitterTrip(GeoLocation start, GeoLocation end) {
+    super();
+
+    setStartPoint(start);
+    setEndPoint(end);
   }
 
   public TwitterTrip(Status startStatus, Status endStatus, double distance) {
@@ -28,6 +38,7 @@ public class TwitterTrip extends Trip {
     setStartPoint(startStatus.getGeoLocation());
     setEndPoint(endStatus.getGeoLocation());
     setDistanceInMeter(distance);
+    setArea(Area.getAreaForLocation(startStatus.getGeoLocation()));
   }
 
   @Override

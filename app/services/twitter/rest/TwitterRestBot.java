@@ -10,7 +10,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import com.typesafe.config.ConfigFactory;
 
 import models.trip.GeoLocation;
-import models.tweets.BoundingBox;
+import models.geography.BoundingBox;
 import models.tweets.RateLimitException;
 import models.tweets.TwitterUser;
 import mongo.MorphiaHelper;

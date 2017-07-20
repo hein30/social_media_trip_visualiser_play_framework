@@ -20,6 +20,7 @@ import utils.HaversineCalculator;
  * Created by Hein Min Htike on 6/25/2017.
  */
 class TweetProcessor {
+  private static final int TIME_WINDOW = 4;
   private static final Logger.ALogger LOGGER = Logger.of(TweetProcessor.class);
 
   public static void main(String args[]) {
@@ -88,7 +89,7 @@ class TweetProcessor {
   }
 
   private static boolean isValidTimeWindow(Status start, Status end) {
-    Date validEndDate = DateUtils.addHours(start.getCreatedAt(), 24);
+    Date validEndDate = DateUtils.addHours(start.getCreatedAt(), TIME_WINDOW);
     return end.getCreatedAt().before(validEndDate);
   }
 

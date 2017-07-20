@@ -1,5 +1,7 @@
 package models.trip;
 
+import play.libs.Json;
+
 /**
  * Created by Hein Min Htike on 6/23/2017.
  */
@@ -36,5 +38,9 @@ public class GeoLocation {
 
   public void setLongitude(double longitude) {
     this.longitude = longitude;
+  }
+
+  public GeoLocation clone() {
+    return Json.fromJson(Json.toJson(this), GeoLocation.class);
   }
 }

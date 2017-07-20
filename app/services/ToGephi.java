@@ -56,6 +56,4 @@ public class ToGephi {
       Files.write(Paths.get("./edges.csv"), baosEdge.toByteArray());
     }
   }
-
-
 }

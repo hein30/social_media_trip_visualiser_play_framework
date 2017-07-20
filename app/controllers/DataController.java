@@ -14,6 +14,7 @@ import org.mongodb.morphia.query.Query;
 
 import actors.twitter.TweetProcessorProtocol;
 import akka.actor.ActorRef;
+import models.geography.Area;
 import models.trip.TwitterTrip;
 import models.tweets.Status;
 import models.tweets.TwitterUser;
@@ -71,15 +72,17 @@ public class DataController extends Controller {
   public Result tweetTrips() {
     boolean detailsRequested = Boolean
         .parseBoolean(request().queryString().getOrDefault("details", new String[] {"false"})[0]);
+    String area = request().queryString().getOrDefault("area", new String[] {"London"})[0];
 
-    Query<TwitterTrip> tripQuery = createTripQuery(detailsRequested);
+    Query<TwitterTrip> tripQuery = createTripQuery(detailsRequested, area);
     List<TwitterTrip> trips;
     if (detailsRequested) {
       trips = tripQuery.asList();
       response().setHeader("Content-Disposition", "attachment; filename=twitter-trips.json");
     } else {
       final FindOptions options = new FindOptions();
-      options.limit(30_000);
+       options.limit(10);
+      tripQuery.field("distanceInMeter").greaterThan(10000);
       trips = tripQuery.asList(options);
     }
     return ok(Json.toJson(trips));
@@ -122,8 +125,10 @@ public class DataController extends Controller {
             r -> badRequest("Your request not served as a tweet processor is already running."));
   }
 
-  private Query<TwitterTrip> createTripQuery(boolean detailsRequested) {
+  private Query<TwitterTrip> createTripQuery(boolean detailsRequested, String area) {
     Query<TwitterTrip> query = MorphiaHelper.getDatastore().createQuery(TwitterTrip.class);
+
+    query.field("area").equal(Area.getAreaForName(area));
 
     // strip off details if not explicitly requested
     if (!detailsRequested) {

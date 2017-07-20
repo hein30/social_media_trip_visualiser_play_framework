@@ -25,14 +25,6 @@
 
 
 
-
-
-
-
-
-
-
-
     </style>
 </head>
 </head>
@@ -40,7 +32,7 @@
 <script type="text/javascript">
 			var mapOptions = {
 				center: {lat: 51.5074, lng: 0.1278},
-				zoom: 10
+				zoom: 11
 			};
 
 			var generic_image = new google.maps.MarkerImage(
@@ -56,62 +48,17 @@
 				map = new google.maps.Map(document.getElementById("googleMap"), mapOptions);
 			}
 
-
 			function loadMarker() {
 				var xhr = new XMLHttpRequest();
-				xhr.open("GET", "/tweet/trip", true);
-				xhr.onreadystatechange = function () {
-					if(xhr.readyState == 4 && xhr.status == 200) {
-						var trips = JSON.parse(xhr.responseText);
-
-						for (var i = 0; i< trips.length; i++){
-
-						    var lat1 = trips[i].startPoint.latitude;
-						    var lng1 = trips[i].startPoint.longitude;
-						    var lat2 = trips[i].endPoint.latitude;
-						    var lng2 = trips[i].endPoint.longitude;
-
-						    var flightPlanCoordinates = [
-                                {lat: lat1, lng: lng1},
-                                {lat: lat2, lng: lng2}
-                            ];
-
-                            var flightPath = new google.maps.Polyline({
-                            path: flightPlanCoordinates,
-                            geodesic: true,
-                            strokeColor: '#FF0000',
-                            strokeOpacity: .7,
-                            strokeWeight: 1
-                            });
-
-                            flightPath.setMap(map);
-						}
-					}
-				}
-				xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-				xhr.send("")
-			}
-
-			function loadGrids() {
-			    var gridSizeSelector = document.getElementById("gridSizeSelector");
-			    var selectedGridSize = gridSizeSelector.options[gridSizeSelector.selectedIndex].value;
-
-                var areaSelector = document.getElementById("areaSelector");
-			    var selectedArea = areaSelector.options[areaSelector.selectedIndex].value;
-
-				var xhr = new XMLHttpRequest();
-				xhr.open("GET", "/grids?area=" + selectedArea +"&numGrids=" + selectedGridSize , true);
+				xhr.open("GET", "/grids?numGrids=30&area=London", true);
 				xhr.onreadystatechange = function () {
 					if(xhr.readyState == 4 && xhr.status == 200) {
 						var grids = JSON.parse(xhr.responseText);
 
 						for (var i = 0; i< grids.length; i++){
 
-                            var mod = i % 2;
-                            var color ;
-                            if (mod ==0){color = '#000000';} else {color = '#0000FF';}
-
                             var bb = grids[i].boundingBox;
+
 
 						    var lat1 = bb.northWest.latitude;
 						    var lng1 = bb.northWest.longitude;
@@ -133,7 +80,7 @@
                             var oneBox = new google.maps.Polyline({
                             path: boxCoords,
                             geodesic: true,
-                            strokeColor: color,
+                            strokeColor: '#000000',
                             strokeOpacity: 1.0,
                             strokeWeight: 2
                             });
@@ -152,28 +99,9 @@
 
 
 
+
 </script>
-
-<button type="button" onclick="initialize()">Reset</button>
-<button type="button" onclick="loadMarker()">Load Trips</button>
-
-<button type="button" onclick="loadGrids()">Load Grids</button>
-
-<label for="gridSizeSelector"> Grid size</label>
-<select id="gridSizeSelector">
-    <option>2</option>
-    <option>20</option>
-    <option>30</option>
-    <option>40</option>
-    <option>50</option>
-</select>
-
-<label for="areaSelector"> Area</label>
-<select id="areaSelector">
-    <option>London</option>
-    <option>Cardiff</option>
-</select>
-
+<button type="button" onclick="loadMarker()">Update</button>
 <div id="googleMap"></div>
 </body>
 </html>
