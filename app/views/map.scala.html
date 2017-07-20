@@ -53,6 +53,7 @@
 				map = new google.maps.Map(document.getElementById("googleMap"), mapOptions);
 			}
 
+
 			function loadMarker() {
 				var xhr = new XMLHttpRequest();
 				xhr.open("GET", "/tweet/trip", true);
@@ -143,9 +144,11 @@
 
 
 </script>
-<button type="button" onclick="loadMarker()">Update</button>
 
-<button type="button" onclick="loadGrids()">Grids</button>
+<button type="button" onclick="initialize()">Reset</button>
+<button type="button" onclick="loadMarker()">Load Trips</button>
+
+<button type="button" onclick="loadGrids()">Load Grids</button>
 
 <label for="gridSizeSelector"> Grid size</label>
 <select id="gridSizeSelector">
@@ -160,6 +163,7 @@
     <option>London</option>
     <option>Cardiff</option>
 </select>
+
 <div id="googleMap"></div>
 </body>
 </html>

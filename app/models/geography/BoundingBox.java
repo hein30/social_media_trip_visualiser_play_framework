@@ -87,23 +87,23 @@ public class BoundingBox {
   public List<Grid> grids(int numGrids, boolean extendedBox) {
     GeodeticCalculator calculator = new GeodeticCalculator();
 
+    BoundingBox extendedBoundingBox;
+
     if (extendedBox) {
       GeoLocation extendedSW = getNewGeoLocation(calculator, southWest, 1_000, 225);
-      GeoLocation extendedNE = getNewGeoLocation(calculator, northEast, 19_000, 45);
+      GeoLocation extendedNE = getNewGeoLocation(calculator, northEast, 20_000, 45);
 
-      BoundingBox extendedBoundingBox = new BoundingBox(extendedSW, extendedNE);
-      this.southEast = extendedBoundingBox.getSouthEast();
-      this.southWest = extendedBoundingBox.getSouthWest();
-      this.northEast = extendedBoundingBox.getNorthEast();
-      this.northWest = extendedBoundingBox.getNorthWest();
+      extendedBoundingBox = new BoundingBox(extendedSW, extendedNE);
+    } else {
+      extendedBoundingBox = this;
     }
 
     List<Grid> grids = new ArrayList<>();
 
-    double xDistance = getHorizontalGridSize(numGrids);
-    double yDistance = getVerticalGridSize(numGrids);
+    double xDistance = getHorizontalGridSize(extendedBoundingBox, numGrids);
+    double yDistance = getVerticalGridSize(extendedBoundingBox, numGrids);
 
-    GeoLocation currentSW = southWest;
+    GeoLocation currentSW = extendedBoundingBox.getSouthWest();
 
 
     for (int row = 0; row < numGrids; row++) {
@@ -161,13 +161,15 @@ public class BoundingBox {
     return new GeoLocation(destinationGeographicPoint.getY(), destinationGeographicPoint.getX());
   }
 
-  public double getVerticalGridSize(int numGrids) {
-    return Math
-        .round(HaversineCalculator.getHaverSineDistanceInMeter(northWest, southWest) / numGrids);
+  public double getVerticalGridSize(BoundingBox box, int numGrids) {
+    return Math.round(
+        HaversineCalculator.getHaverSineDistanceInMeter(box.getNorthWest(), box.getSouthWest())
+            / numGrids);
   }
 
-  public double getHorizontalGridSize(int numGrids) {
-    return Math
-        .round(HaversineCalculator.getHaverSineDistanceInMeter(northWest, northEast) / numGrids);
+  public double getHorizontalGridSize(BoundingBox box, int numGrids) {
+    return Math.round(
+        HaversineCalculator.getHaverSineDistanceInMeter(box.getNorthWest(), box.getNorthEast())
+            / numGrids);
   }
 }
