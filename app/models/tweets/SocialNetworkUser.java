@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import models.geography.BoundingBox;
 import org.mongodb.morphia.annotations.Id;
 
 import com.google.common.collect.Lists;

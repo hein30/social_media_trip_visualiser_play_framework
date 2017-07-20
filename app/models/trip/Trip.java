@@ -2,7 +2,9 @@ package models.trip;
 
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Indexed;
 
+import models.geography.Area;
 import mongo.MorphiaHelper;
 
 /**
@@ -19,6 +21,8 @@ public abstract class Trip {
   private GeoLocation startPoint;
   private GeoLocation endPoint;
   private double distanceInMeter;
+  @Indexed
+  private Area area;
 
   public Trip() {
     // default constructor.
@@ -62,5 +66,13 @@ public abstract class Trip {
 
   public void setDistanceInMeter(double distanceInMeter) {
     this.distanceInMeter = distanceInMeter;
+  }
+
+  public Area getArea() {
+    return area;
+  }
+
+  public void setArea(Area area) {
+    this.area = area;
   }
 }

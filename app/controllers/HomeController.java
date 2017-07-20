@@ -8,6 +8,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.index;
 import views.html.map;
+import views.html.gridMap;
 
 /**
  * This controller contains an action to handle HTTP requests to the application's home page.
@@ -24,9 +25,5 @@ public class HomeController extends Controller {
    */
   public Result index() {
     return ok(index.render("Your new application is ready."));
-  }
-
-  public Result map() {
-    return ok(map.render());
   }
 }
