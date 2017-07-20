@@ -128,7 +128,10 @@ public class BoundingBox {
   }
 
   /**
-   * Calculate column grids for this row.
+   * Calculate column grids for this row. <br>
+   * If we want to move horizontally,calculate new coordinates at 0 degree and distance, and take
+   * only new longitude. (because taking new lat/long causes gaps in the grid due to the spherical
+   * shape of the world.
    * 
    * @param calculator
    * @param numGrids - number of columns
@@ -141,12 +144,15 @@ public class BoundingBox {
       double xDistance, GeoLocation currentSW, GeoLocation currentNE) {
     List<Grid> grids = new ArrayList<>();
     for (int col = 0; col < numGrids; col++) {
-      GeoLocation newNE = getNewGeoLocation(calculator, currentNE, xDistance, 90);
+      GeoLocation newLongitudeCoordinates = getNewGeoLocation(calculator, currentNE, xDistance, 90);
+      GeoLocation newNE =
+          new GeoLocation(currentNE.getLatitude(), newLongitudeCoordinates.getLongitude());
       BoundingBox bb = new BoundingBox(currentSW.clone(), newNE.clone());
       grids.add(new Grid(bb));
 
       currentNE = newNE;
-      currentSW = getNewGeoLocation(calculator, currentSW, xDistance, 90);
+      // currentSW = getNewGeoLocation(calculator, currentSW, xDistance, 90);
+      currentSW = new GeoLocation(currentSW.getLatitude(), currentNE.getLongitude());
     }
 
     return grids;

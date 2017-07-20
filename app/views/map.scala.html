@@ -30,6 +30,9 @@
 
 
 
+
+
+
     </style>
 </head>
 </head>
@@ -104,8 +107,11 @@
 
 						for (var i = 0; i< grids.length; i++){
 
-                            var bb = grids[i].boundingBox;
+                            var mod = i % 2;
+                            var color ;
+                            if (mod ==0){color = '#000000';} else {color = '#0000FF';}
 
+                            var bb = grids[i].boundingBox;
 
 						    var lat1 = bb.northWest.latitude;
 						    var lng1 = bb.northWest.longitude;
@@ -127,7 +133,7 @@
                             var oneBox = new google.maps.Polyline({
                             path: boxCoords,
                             geodesic: true,
-                            strokeColor: '#000000',
+                            strokeColor: color,
                             strokeOpacity: 1.0,
                             strokeWeight: 2
                             });
@@ -143,6 +149,9 @@
 			google.maps.event.addDomListener(window, 'load', initialize)
 
 
+
+
+
 </script>
 
 <button type="button" onclick="initialize()">Reset</button>
@@ -152,6 +161,7 @@
 
 <label for="gridSizeSelector"> Grid size</label>
 <select id="gridSizeSelector">
+    <option>2</option>
     <option>20</option>
     <option>30</option>
     <option>40</option>
