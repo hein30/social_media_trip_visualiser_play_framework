@@ -54,24 +54,24 @@ public class NodeAggregator {
     Node startNode = startNodeOptional.get();
     Node endNode = endNodeOptional.get();
 
-    nodeMap.computeIfAbsent(startNode.getId(), zz -> startNode).addStartPoint(trip.getStartPoint());
+    nodeMap.computeIfAbsent(startNode.getId(), a -> startNode).addStartPoint(trip.getStartPoint());
     nodeMap.computeIfAbsent(endNode.getId(), a -> endNode).addEndPoint(trip.getEndPoint());
 
     Edge edge = new Edge(nodeMap.get(startNode.getId()), nodeMap.get(endNode.getId()));
 
-    // if this is un-directed graph, and edge does not exists already, we try the reverse edge.
+    // if this is un-directed graph, and edge does not exists already, we try the reverse direction.
     if (!isDirected && !edgeMap.containsKey(edge.getId())) {
       Edge reverseEdge = new Edge(nodeMap.get(endNode.getId()), nodeMap.get(startNode.getId()));
-      edgeMap.computeIfAbsent(reverseEdge.getId(), a -> reverseEdge).increseEdgeWeight();
+      edgeMap.computeIfAbsent(reverseEdge.getId(), a -> reverseEdge).increaseEdgeWeight();
     } else {
-      edgeMap.computeIfAbsent(edge.getId(), a -> edge).increseEdgeWeight();
+      edgeMap.computeIfAbsent(edge.getId(), a -> edge).increaseEdgeWeight();
     }
   }
 
   private Optional<Node> getNodeForLocation(List<Grid> grids, GeoLocation location) {
 
     for (Grid grid : grids) {
-      if (grid.getBoundingBox().isLocationInBox(location)) {
+      if (grid.isPointInside(location)) {
         return Optional.of(new Node(grid));
       }
     }

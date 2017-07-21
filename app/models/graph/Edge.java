@@ -47,11 +47,11 @@ public class Edge {
     this.id = id;
   }
 
-  public void increseEdgeWeight() {
-    increseEdgeWeight(1);
+  public void increaseEdgeWeight() {
+    increaseEdgeWeight(1);
   }
 
-  public void increseEdgeWeight(int weightToIncrese) {
+  public void increaseEdgeWeight(int weightToIncrese) {
     this.weight = weight + weightToIncrese;
   }
 }

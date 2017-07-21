@@ -149,8 +149,7 @@ public class BoundingBox {
       GeoLocation newNE =
           new GeoLocation(currentNE.getLatitude(), newLongitudeCoordinates.getLongitude());
       BoundingBox bb = new BoundingBox(currentSW.clone(), newNE.clone());
-      Grid grid = new Grid(bb);
-      grid.setId("row:" + rowNum + " col:" + col);
+      Grid grid = new Grid("row:" + rowNum + " col:" + col, bb);
       grids.add(grid);
 
       currentNE = newNE;
