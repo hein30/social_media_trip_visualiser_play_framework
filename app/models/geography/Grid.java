@@ -51,10 +51,6 @@ public class Grid {
     return midPoint;
   }
 
-  public void calculateMidpoint(GeoLocation midPoint) {
-    this.midPoint = midPoint;
-  }
-
   public boolean isPointInside(GeoLocation location) {
     return this.boundingBox.isLocationInBox(location);
   }
