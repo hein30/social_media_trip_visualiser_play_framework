@@ -19,6 +19,10 @@
 			min-height: 100%;
 		}
 
+
+
+
+
     </style>
 </head>
 </head>
@@ -88,6 +92,10 @@
 					    }else {
 					        var edgeList = response.edgeList;
 
+					        var lineWidthDividerSelector = document.getElementById("lineWidth");
+			                var lineWidthDivider = lineWidthDividerSelector.options[lineWidthDividerSelector.selectedIndex].value;
+
+
 					        for (var i = 0; i< edgeList.length; i++){
 
                                 var edge = edgeList[i];
@@ -109,7 +117,7 @@
                                 geodesic: true,
                                 strokeColor: '#FF0000',
                                 strokeOpacity: 0.7,
-                                strokeWeight: edge.weight/50
+                                strokeWeight: edge.weight/lineWidthDivider
                                 });
 
                                 flightPath.setMap(map);
@@ -178,8 +186,6 @@
 			google.maps.event.addDomListener(window, 'load', initialize)
 
 
-
-
 </script>
 
 <button type="button" onclick="initialize()">Reset</button>
@@ -194,6 +200,19 @@
     <option>30</option>
     <option>40</option>
     <option>50</option>
+</select>
+
+<label for="lineWidth"> Line width divider(number of lines / this val)</label>
+<select id="lineWidth">
+    <option>1</option>
+    <option>5</option>
+    <option>10</option>
+    <option>20</option>
+    <option>30</option>
+    <option>40</option>
+    <option>50</option>
+    <option>100</option>
+
 </select>
 
 <label for="areaSelector"> Area</label>
