@@ -9,8 +9,8 @@ import org.apache.commons.lang3.time.DateUtils;
 
 import com.typesafe.config.ConfigFactory;
 
-import models.trip.GeoLocation;
 import models.geography.BoundingBox;
+import models.trip.GeoLocation;
 import models.tweets.RateLimitException;
 import models.tweets.TwitterUser;
 import mongo.MorphiaHelper;
@@ -106,13 +106,14 @@ class TwitterRestBot extends TwitterBot {
 
   private void updateUser(TwitterUser user, ResponseList<Status> allStatuses) {
     user.setNextProcessTime(DateUtils.addDays(new Date(), 2));
-    if (!allStatuses.isEmpty()){
+    if (!allStatuses.isEmpty()) {
       user.setLastTweetId(String.valueOf(allStatuses.get(0).getId()));
     }
     user.update();
   }
 
   private int saveTweets(ResponseList<Status> allStatuses) {
+    // todo should pass in the actual twitter user rather than creating new one.
     List<Status> statusesToSave = allStatuses.stream().filter(s -> useTweet(s, new TwitterUser()))
         .collect(Collectors.toList());
 
