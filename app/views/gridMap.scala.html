@@ -27,6 +27,7 @@
 <button type="button" onclick="loadTripDataAndDraw()">Load Trips</button>
 <button type="button" onclick="loadGrids()">Load Grids</button>
 <button type="button" onclick="redrawTrips()">Redraw Trips</button>
+<button type="button" onclick="loadGridArray()">Load Grid Array</button>
 
 <label for="gridSizeSelector"> Grid size</label>
 <select id="gridSizeSelector">
@@ -121,6 +122,54 @@
                             ];
 
                             drawOneLine(boxCoords, color, 1,  2);
+						}
+					}
+				}
+				xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				xhr.send("")
+			}
+
+			function loadGridArray() {
+			    var selectedGridSize = gridSizeSelector.options[gridSizeSelector.selectedIndex].value;
+			    var selectedArea = areaSelector.options[areaSelector.selectedIndex].value;
+
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", "/gridsArray?area=" + selectedArea +"&numGrids=" + selectedGridSize , true);
+				xhr.onreadystatechange = function () {
+					if(xhr.readyState == 4 && xhr.status == 200) {
+						var grids = JSON.parse(xhr.responseText);
+
+						for (var row = 0; row< 1; row++){
+
+						    for ( var col = 0; col< selectedGridSize; col++){
+
+						    var mod = (row + col) % 2;
+						    var color;
+
+                            if (mod ==0){color = '#000000';} else {color = '#0000FF';}
+
+                            var bb = grids[row][col].boundingBox;
+
+                            var lat1 = bb.northWest.latitude;
+						    var lng1 = bb.northWest.longitude;
+						    var lat2 = bb.northEast.latitude;
+						    var lng2 = bb.northEast.longitude;
+						    var lat3 = bb.southEast.latitude;
+						    var lng3 = bb.southEast.longitude;
+						    var lat4 = bb.southWest.latitude;
+						    var lng4 = bb.southWest.longitude;
+
+						    var boxCoords = [
+                                {lat: lat1, lng: lng1},
+                                {lat: lat2, lng: lng2},
+                                {lat: lat3, lng: lng3},
+                                {lat: lat4, lng: lng4},
+                                {lat: lat1, lng: lng1}
+                            ];
+
+                            drawOneLine(boxCoords, color, 1,  2);
+
+						    }
 						}
 					}
 				}

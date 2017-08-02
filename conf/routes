@@ -8,6 +8,7 @@ GET     /                           controllers.HomeController.index
 GET     /map                        controllers.MapController.map
 GET     /gridMap                    controllers.MapController.gridMap
 GET     /grids                      controllers.MapController.grids
+GET     /gridsArray                 controllers.MapController.gridsArray
 
 # An example controller showing how to use dependency injection
 GET     /count                      controllers.CountController.count

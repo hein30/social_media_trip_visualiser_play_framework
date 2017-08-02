@@ -30,4 +30,14 @@ public class MapController extends Controller {
 
     return ok(Json.toJson(originalBox.grids(numGrids, false)));
   }
+
+  public Result gridsArray(){
+    String area = request().queryString().getOrDefault("area", new String[] {"LONDON"})[0];
+    int numGrids =
+            Integer.parseInt(request().queryString().getOrDefault("numGrids", new String[] {"50"})[0]);
+    BoundingBox originalBox = Area.getAreaForName(area).getBoundingBox();
+
+    return ok(Json.toJson(originalBox.gridsArrays(numGrids, false)));
+
+  }
 }

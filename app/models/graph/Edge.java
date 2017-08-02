@@ -1,5 +1,7 @@
 package models.graph;
 
+import org.geotools.referencing.GeodeticCalculator;
+
 /**
  * Created by Hein Min Htike on 7/20/2017.
  */
@@ -8,11 +10,13 @@ public class Edge {
   private Node from;
   private Node to;
   private int weight;
+  private double angle;
 
   public Edge(Node from, Node to) {
     this.from = from;
     this.to = to;
     this.id = from.getId() + to.getId();
+    angle = get180Angle();
   }
 
   public Node getFrom() {
@@ -53,5 +57,34 @@ public class Edge {
 
   public void increaseEdgeWeight(int weightToIncrese) {
     this.weight = weight + weightToIncrese;
+  }
+
+
+  private double get180Angle() {
+    double azimuth = getAzimuth();
+    return azimuth < 0 ? 180 + azimuth : azimuth;
+  }
+
+  /**
+   * Returns angles between -180 and 180 degrees.
+   * 
+   * @return
+   */
+  private double getAzimuth() {
+    GeodeticCalculator calculator = new GeodeticCalculator();
+    calculator.setStartingGeographicPoint(from.getCenterLocation().getLongitude(),
+        from.getCenterLocation().getLatitude());
+    calculator.setDestinationGeographicPoint(to.getCenterLocation().getLongitude(),
+        to.getCenterLocation().getLatitude());
+
+    return calculator.getAzimuth();
+  }
+
+  public double getAngle() {
+    return angle;
+  }
+
+  public void setAngle(double angle) {
+    this.angle = angle;
   }
 }

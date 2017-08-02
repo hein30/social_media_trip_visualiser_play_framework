@@ -1,5 +1,6 @@
 package models.trip;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import play.libs.Json;
 
 /**
@@ -38,6 +39,10 @@ public class GeoLocation {
 
   public void setLongitude(double longitude) {
     this.longitude = longitude;
+  }
+
+  public Coordinate getCoordinate(){
+      return new Coordinate(longitude, latitude);
   }
 
   public GeoLocation clone() {

@@ -12,6 +12,8 @@ import org.junit.Test;
 import com.google.common.collect.Lists;
 
 import models.trip.GeoLocation;
+import models.trip.Trip;
+import models.trip.TwitterTrip;
 
 /**
  * Tests for {@link BoundingBox}.
@@ -114,5 +116,15 @@ public class BoundingBoxTest {
       assertEquals(bottomBox.getNorthEast().getLatitude(), topBox.getSouthEast().getLatitude(),
           1e-5);
     }
+  }
+
+  @Test
+  public void testIsEdgeIntersecting() {
+    GeoLocation start = new GeoLocation(51.467199, -3.498076);
+    GeoLocation end = new GeoLocation(51.513587, -3.623046);
+    Trip trip = new TwitterTrip(start, end);
+
+    assertFalse(londonBox().isEdgeIntersect(trip));
+
   }
 }
