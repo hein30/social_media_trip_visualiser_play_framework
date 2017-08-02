@@ -123,8 +123,22 @@ public class BoundingBoxTest {
     GeoLocation start = new GeoLocation(51.467199, -3.498076);
     GeoLocation end = new GeoLocation(51.513587, -3.623046);
     Trip trip = new TwitterTrip(start, end);
+    assertFalse(londonBox().crossBoundary(trip));
 
-    assertFalse(londonBox().isEdgeIntersect(trip));
+    GeoLocation intersectingStart = new GeoLocation(51.713152, -0.128221);
+    GeoLocation intersectingEnd = new GeoLocation(51.431957, -0.100856);
+    Trip intersectingTrip = new TwitterTrip(intersectingStart, intersectingEnd);
+    assertTrue(londonBox().crossBoundary(intersectingTrip));
 
+    GeoLocation trip3Start = new GeoLocation(51.366380, 0.100238);
+    GeoLocation trip3End = new GeoLocation(51.396414, 0.011162);
+    Trip trip3 = new TwitterTrip(trip3Start, trip3End);
+    assertTrue(londonBox().crossBoundary(trip3));
+
+    // trip that is completely inside bounding box
+    GeoLocation trip4Start = new GeoLocation(51.425152, -0.037984);
+    GeoLocation trip4End = new GeoLocation(51.461999, -0.100935);
+    Trip trip4 = new TwitterTrip(trip4Start, trip4End);
+    assertFalse(londonBox().crossBoundary(trip4));
   }
 }

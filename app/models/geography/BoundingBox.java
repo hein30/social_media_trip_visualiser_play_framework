@@ -90,7 +90,8 @@ public class BoundingBox {
   public Grid[][] gridsArrays(int numGrids, boolean extendedBox) {
     Grid[][] gridArray = new Grid[numGrids][numGrids];
 
-    List<List<Grid>> partitionedList = Lists.reverse(Lists.partition(grids(numGrids, extendedBox), numGrids));
+    List<List<Grid>> partitionedList =
+        Lists.reverse(Lists.partition(grids(numGrids, extendedBox), numGrids));
 
     int row = 0;
     for (List<Grid> rowList : partitionedList) {
@@ -205,7 +206,12 @@ public class BoundingBox {
             / numGrids);
   }
 
-  public boolean isEdgeIntersect(Trip trip) {
+  public boolean crossBoundary(Trip trip) {
+    return !(this.isLocationInBox(trip.getStartPoint()) && this.isLocationInBox(trip.getEndPoint()))
+        && isEdgeIntersect(trip);
+  }
+
+  private boolean isEdgeIntersect(Trip trip) {
     GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
 
     Coordinate[] coordinates =
