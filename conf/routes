@@ -19,6 +19,7 @@ GET     /messageSync                controllers.AsyncController.messageSync
 
 GET     /tweet/total                controllers.DataController.tweetTotal
 GET     /tweet/trip                 controllers.DataController.tweetTrips
+GET     /tweet/trip/edgeBundle      controllers.DataController.aggregateEdges
 
 GET     /tweet/processor/status     controllers.DataController.processorStatus
 GET     /tweet/processor/run        controllers.DataController.processorRun

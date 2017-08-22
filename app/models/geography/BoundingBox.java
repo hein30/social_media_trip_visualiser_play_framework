@@ -10,9 +10,11 @@ import org.geotools.referencing.GeodeticCalculator;
 import com.google.common.collect.Lists;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Polygon;
 
+import models.graph.Edge;
 import models.trip.GeoLocation;
 import models.trip.Trip;
 import play.libs.Json;
@@ -96,7 +98,9 @@ public class BoundingBox {
     int row = 0;
     for (List<Grid> rowList : partitionedList) {
       for (int col = 0; col < rowList.size(); col++) {
-        gridArray[row][col] = rowList.get(col);
+        final Grid grid = rowList.get(col);
+        grid.setId("FixedId: row: " + row + " col: " + col);
+        gridArray[row][col] = grid;
       }
       row++;
     }
@@ -206,23 +210,44 @@ public class BoundingBox {
             / numGrids);
   }
 
+  public boolean crossBoundary(Edge edge) {
+    return !(this.isLocationInBox(edge.getFrom().getCenterLocation())
+        && this.isLocationInBox(edge.getTo().getCenterLocation())) && isEdgeIntersect(edge);
+  }
+
   public boolean crossBoundary(Trip trip) {
     return !(this.isLocationInBox(trip.getStartPoint()) && this.isLocationInBox(trip.getEndPoint()))
         && isEdgeIntersect(trip);
   }
 
-  private boolean isEdgeIntersect(Trip trip) {
+  private boolean isEdgeIntersect(Coordinate[] polygonPoints, Coordinate[] linePoints) {
     GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
-
-    Coordinate[] coordinates =
-        new Coordinate[] {southWest.getCoordinate(), southEast.getCoordinate(),
-            northEast.getCoordinate(), northWest.getCoordinate(), southWest.getCoordinate()};
-
-    LinearRing ring = geometryFactory.createLinearRing(coordinates);
+    LinearRing ring = geometryFactory.createLinearRing(polygonPoints);
     Polygon polygon = geometryFactory.createPolygon(ring, null);
 
-    return polygon.intersects(geometryFactory.createLineString(new Coordinate[] {
-        trip.getStartPoint().getCoordinate(), trip.getEndPoint().getCoordinate()}));
+    LineString line = geometryFactory.createLineString(linePoints);
+
+    return polygon.intersects(line);
+  }
+
+  private boolean isEdgeIntersect(Edge edge) {
+
+    Coordinate[] line = new Coordinate[] {edge.getFrom().getCenterLocation().getCoordinate(),
+        edge.getTo().getCenterLocation().getCoordinate()};
+    return isEdgeIntersect(getBoundingBoxPolygonCoords(), line);
+  }
+
+  private boolean isEdgeIntersect(Trip trip) {
+
+    Coordinate[] line =
+        new Coordinate[] {trip.getStartPoint().getCoordinate(), trip.getEndPoint().getCoordinate()};
+
+    return isEdgeIntersect(getBoundingBoxPolygonCoords(), line);
+  }
+
+  private Coordinate[] getBoundingBoxPolygonCoords() {
+    return new Coordinate[] {southWest.getCoordinate(), southEast.getCoordinate(),
+        northEast.getCoordinate(), northWest.getCoordinate(), southWest.getCoordinate()};
   }
 
   public BoundingBox clone() {

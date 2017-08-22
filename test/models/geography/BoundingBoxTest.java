@@ -90,14 +90,14 @@ public class BoundingBoxTest {
         final BoundingBox rightBox = row.get(i).getBoundingBox();
 
         assertEquals(leftBox.getSouthEast().getLatitude(), rightBox.getSouthWest().getLatitude(),
-            1e-6);
+                1e-6);
         assertEquals(leftBox.getSouthEast().getLongitude(), rightBox.getSouthWest().getLongitude(),
-            1e-6);
+                1e-6);
 
         assertEquals(leftBox.getNorthEast().getLatitude(), rightBox.getNorthWest().getLatitude(),
-            1e-6);
+                1e-6);
         assertEquals(leftBox.getNorthEast().getLongitude(), rightBox.getNorthWest().getLongitude(),
-            1e-6);
+                1e-6);
       }
     }
 
@@ -107,14 +107,14 @@ public class BoundingBoxTest {
       final BoundingBox topBox = rows.get(i).get(0).getBoundingBox();
 
       assertEquals(bottomBox.getNorthWest().getLongitude(), topBox.getSouthWest().getLongitude(),
-          1e-5);
+              1e-5);
       assertEquals(bottomBox.getNorthWest().getLatitude(), topBox.getSouthWest().getLatitude(),
-          1e-5);
+              1e-5);
 
       assertEquals(bottomBox.getNorthEast().getLongitude(), topBox.getSouthEast().getLongitude(),
-          1e-5);
+              1e-5);
       assertEquals(bottomBox.getNorthEast().getLatitude(), topBox.getSouthEast().getLatitude(),
-          1e-5);
+              1e-5);
     }
   }
 

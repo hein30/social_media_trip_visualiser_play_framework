@@ -16,6 +16,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import actors.twitter.TweetProcessorProtocol;
 import akka.actor.ActorRef;
 import models.geography.Area;
+import models.geography.BoundingBox;
+import models.geography.Grid;
 import models.graph.ResultGraph;
 import models.trip.TwitterTrip;
 import models.tweets.Status;
@@ -26,6 +28,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import scala.compat.java8.FutureConverters;
 import scala.concurrent.Future;
+import services.aggregator.edgeAggregator.GBEB;
 import services.aggregator.nodeAggregator.NodeAggregator;
 import services.twitter.rest.TwitterRestfulActorProtocol;
 
@@ -98,6 +101,30 @@ public class DataController extends Controller {
 
     JsonNode node = Json.toJson(graph);
     return ok(node);
+  }
+
+  public Result aggregateEdges() {
+    List<TwitterTrip> trips = getTwitterTrips();
+    String area = request().queryString().getOrDefault("area", new String[] {"London"})[0];
+    int numGrids =
+        Integer.parseInt(request().queryString().getOrDefault("numGrids", new String[] {"40"})[0]);
+
+    int numGridsForEdgeBundling = Integer.parseInt(
+        request().queryString().getOrDefault("numGridsEdgeBundling", new String[] {"40"})[0]);
+
+    int angularDifferenceThreshold = Integer.parseInt(
+        request().queryString().getOrDefault("angularDifferenceThreshold", new String[] {"15"})[0]);
+
+    NodeAggregator aggregator = new NodeAggregator();
+    final BoundingBox boundingBox = Area.getAreaForName(area).getBoundingBox();
+    final ResultGraph graph = aggregator.aggregateNodes(boundingBox, numGrids, false, trips, false);
+
+    GBEB edgeAggregator = new GBEB(graph.getEdgeList());
+    Grid[][] gridArray = boundingBox.gridsArrays(numGridsForEdgeBundling, false);
+    edgeAggregator.withGrids(gridArray);
+    edgeAggregator.withAngularDiffThreshold(angularDifferenceThreshold);
+    edgeAggregator.process();
+    return ok(Json.toJson(edgeAggregator.getRegionGridList()));
   }
 
   private List<TwitterTrip> getTwitterTrips() {
