@@ -77,6 +77,12 @@ public class RegionGrid {
     this.averageDominantAngle = averageDominantAngle;
   }
 
+  public void generateMidPointAndIntersections() {
+    getMidPoint();
+
+    generateBoundaryIntersections();
+  }
+
   public GeoLocation getMidPoint() {
     if (midPoint == null) {
       midPoint = GeoCalculationHelper.calculateMidpoint(minX, minY, maxX, maxY);
@@ -91,23 +97,17 @@ public class RegionGrid {
    *
    * @return
    */
-  public void boundaryIntersections() {
+  public void generateBoundaryIntersections() {
     GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
 
     double azimuthMinus90 = averageDominantAngle - 90;
     double azimuthPlus90 = averageDominantAngle + 90;
 
-    Point2D plus90EndPoint =
-        GeoCalculationHelper.getEndPointAtGivenDirection(getMidPoint(), azimuthPlus90, 10_000_0);
-    Point2D minus90EndPoint =
-        GeoCalculationHelper.getEndPointAtGivenDirection(getMidPoint(), azimuthMinus90, 10_000_0);
+    Point2D plus90EndPoint = getDestinationPoint(azimuthPlus90);
+    Point2D minus90EndPoint = getDestinationPoint(azimuthMinus90);
 
-    LineString plus90LineString =
-        geometryFactory.createLineString(new Coordinate[] {getMidPoint().getCoordinate(),
-            new Coordinate(plus90EndPoint.getX(), plus90EndPoint.getY())});
-    LineString minus90LineString =
-        geometryFactory.createLineString(new Coordinate[] {getMidPoint().getCoordinate(),
-            new Coordinate(minus90EndPoint.getX(), minus90EndPoint.getY())});
+    LineString plus90LineString = getLineString(geometryFactory, plus90EndPoint);
+    LineString minus90LineString = getLineString(geometryFactory, minus90EndPoint);
 
     List<Coordinate> plus90AllCoordinates = new ArrayList<>();
     List<Coordinate> minus90AllCoordinates = new ArrayList<>();
@@ -129,29 +129,35 @@ public class RegionGrid {
       }
     }
 
-    double plus90Distance = 0;
-    double minus90Distance = 0;
-    for (Coordinate coordinate : plus90AllCoordinates) {
+    minus90Intersection = getCoordinateWithMaxDistance(minus90AllCoordinates);
+    plus90Intersection = getCoordinateWithMaxDistance(plus90AllCoordinates);
+  }
 
-      double distance = HaversineCalculator.getHaverSineDistanceInMeter(getMidPoint(),
-          new GeoLocation(coordinate.y, coordinate.x));
+  private LineString getLineString(GeometryFactory geometryFactory, Point2D plus90EndPoint) {
+    return geometryFactory.createLineString(new Coordinate[] {getMidPoint().getCoordinate(),
+        new Coordinate(plus90EndPoint.getX(), plus90EndPoint.getY())});
+  }
 
-      if (distance > plus90Distance) {
-        plus90Distance = distance;
-        plus90Intersection = coordinate;
-      }
-    }
+  private Point2D getDestinationPoint(double azimuthPlus90) {
+    return GeoCalculationHelper.getEndPointAtGivenDirection(getMidPoint(), azimuthPlus90, 10_000_0);
+  }
 
-    for (Coordinate coordinate : minus90AllCoordinates) {
+  /**
+   * Get the intersection point with max distance from center.
+   * 
+   * @param coordinateList
+   * @return
+   */
+  private Coordinate getCoordinateWithMaxDistance(List<Coordinate> coordinateList) {
 
-      double distance = HaversineCalculator.getHaverSineDistanceInMeter(getMidPoint(),
-          new GeoLocation(coordinate.y, coordinate.x));
+    Optional<Coordinate> coordinateOptional = coordinateList.stream()
+        .reduce((a,
+            b) -> HaversineCalculator.getHaverSineDistanceInMeter(getMidPoint(),
+                new GeoLocation(a.y, a.x)) > HaversineCalculator
+                    .getHaverSineDistanceInMeter(getMidPoint(), new GeoLocation(b.y, b.x)) ? a : b);
 
-      if (distance > minus90Distance) {
-        minus90Distance = distance;
-        minus90Intersection = coordinate;
-      }
-    }
+    return coordinateOptional.isPresent() ? coordinateOptional.get()
+        : getMidPoint().getCoordinate();
   }
 
   public Coordinate getPlus90Intersection() {

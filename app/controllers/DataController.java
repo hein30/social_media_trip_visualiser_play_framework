@@ -19,6 +19,7 @@ import models.geography.Area;
 import models.geography.BoundingBox;
 import models.geography.Grid;
 import models.graph.ResultGraph;
+import models.graph.TriangulationResults;
 import models.trip.TwitterTrip;
 import models.tweets.Status;
 import models.tweets.TwitterUser;
@@ -124,7 +125,7 @@ public class DataController extends Controller {
     edgeAggregator.withGrids(gridArray);
     edgeAggregator.withAngularDiffThreshold(angularDifferenceThreshold);
     edgeAggregator.process();
-    return ok(Json.toJson(edgeAggregator.getRegionGridList()));
+    return ok(Json.toJson(new TriangulationResults(edgeAggregator)));
   }
 
   private List<TwitterTrip> getTwitterTrips() {

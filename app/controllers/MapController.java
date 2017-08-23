@@ -7,6 +7,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.gridMap;
 import views.html.map;
+import views.html.triangulation;
 
 /**
  * Created by Hein Min Htike on 7/20/2017.
@@ -19,6 +20,10 @@ public class MapController extends Controller {
 
   public Result gridMap() {
     return ok(gridMap.render());
+  }
+
+  public Result triangulation(){
+    return ok(triangulation.render());
   }
 
   public Result grids() {
@@ -38,6 +43,5 @@ public class MapController extends Controller {
     BoundingBox originalBox = Area.getAreaForName(area).getBoundingBox();
 
     return ok(Json.toJson(originalBox.gridsArrays(numGrids, false)));
-
   }
 }

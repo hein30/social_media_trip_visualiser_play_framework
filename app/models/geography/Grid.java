@@ -25,8 +25,6 @@ public class Grid {
     angles = new HashMap<>();
   }
 
-
-
   public BoundingBox getBoundingBox() {
     return boundingBox;
   }

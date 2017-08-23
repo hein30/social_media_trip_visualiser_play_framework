@@ -39,6 +39,9 @@ libraryDependencies += "org.geotools" % "gt-referencing" % "17.1"
 // https://mvnrepository.com/artifact/nz.ac.waikato.cms.weka/weka-stable
 libraryDependencies += "nz.ac.waikato.cms.weka" % "weka-stable" % "3.8.1"
 
+// https://mvnrepository.com/artifact/org.orbisgis/jdelaunay
+libraryDependencies += "org.orbisgis" % "jdelaunay" % "0.5.3"
+
 resolvers += "Boundless" at "http://repo.boundlessgeo.com/main"
 resolvers += "Osgeo Repo" at "http://download.osgeo.org/webdav/geotools/"
 

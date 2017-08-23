@@ -1,22 +1,35 @@
 package models.graph;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.geotools.referencing.GeodeticCalculator;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
 
 /**
  * Created by Hein Min Htike on 7/20/2017.
  */
 public class Edge {
+
+  private LineString lineString;
   private String id;
   private Node from;
   private Node to;
   private int weight;
   private double angle;
+  private List<Node> subNodes;
 
   public Edge(Node from, Node to) {
     this.from = from;
     this.to = to;
     this.id = from.getId() + to.getId();
     angle = get180Angle();
+
+    subNodes = Collections.synchronizedList(new ArrayList<>());
   }
 
   public Node getFrom() {
@@ -86,5 +99,24 @@ public class Edge {
 
   public void setAngle(double angle) {
     this.angle = angle;
+  }
+
+  public List<Node> getSubNodes() {
+    return subNodes;
+  }
+
+  public void setSubNodes(List<Node> subNodes) {
+    this.subNodes = subNodes;
+  }
+
+
+  public LineString getLineString(GeometryFactory factory) {
+    if (lineString == null) {
+      lineString =
+          factory.createLineString(new Coordinate[] {this.from.getCenterLocation().getCoordinate(),
+              this.to.getCenterLocation().getCoordinate()});
+    }
+
+    return lineString;
   }
 }

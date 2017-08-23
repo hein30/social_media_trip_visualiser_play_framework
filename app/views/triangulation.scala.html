@@ -19,7 +19,6 @@
 			min-height: 100%;
 		}
 
-
     </style>
 </head>
 </head>
@@ -49,7 +48,16 @@
 <input type="text" id="angulardifferenceThreshold" maxlength="3" value="15">
 
 <label for="lineWidth"> Line width divider(number of lines / this val)</label>
-<input type="text" id="lineWidth" maxlength="3" value="600">
+<select id="lineWidth">
+    <option>1</option>
+    <option>5</option>
+    <option>10</option>
+    <option>20</option>
+    <option>30</option>
+    <option>40</option>
+    <option>50</option>
+    <option>100</option>
+</select>
 
 <label for="areaSelector"> Area</label>
 <select id="areaSelector">
@@ -57,11 +65,7 @@
     <option>Cardiff</option>
 </select>
 
-<input type="checkbox" id="checkBoxOption" value="true" checked> Aggregate nodes
-
-<input type="checkbox" id="drawTriangulationLabels" value="true"> Draw Triangulation Labels
-<input type="checkbox" id="drawTriangulationRegions" value="true"> Draw Triangulation Regions
-<input type="checkbox" id="drawConstraintMesh" value="true">Draw Mesh
+<input type="checkbox" id="checkBoxOption" value="true"> Aggregate nodes
 
 <div id="googleMap"></div>
 
@@ -92,9 +96,6 @@
 
 			var map;
 			var aggregateNodesOption = document.getElementById("checkBoxOption");
-			var triangulationLabels = document.getElementById("drawTriangulationLabels");
-			var triangulationRegions = document.getElementById("drawTriangulationRegions");
-			var drawMesh = document.getElementById("drawConstraintMesh");
 			var gridSizeSelector = document.getElementById("gridSizeSelector");
             var areaSelector = document.getElementById("areaSelector");
  	        var lineWidthDividerSelector = document.getElementById("lineWidth");
@@ -114,110 +115,94 @@
        			var selectedGridSizeEdgeBundling = gridSizeEdgeBundling.value;
        			var selectedThreshold = angularDifferenceThreshold.value;
 
-                var drawLabelsOption = triangulationLabels.checked;
-			    var drawTrigRegionsOption = triangulationRegions.checked;
-			    var drawMeshOption = drawMesh.checked;
-
 				var xhr = new XMLHttpRequest();
 				xhr.open("GET", "/tweet/trip/edgeBundle?area=" + selectedArea +"&numGrids=" + selectedGridSize +"&numGridsEdgeBundling=" +selectedGridSizeEdgeBundling +"&angularDifferenceThreshold=" + selectedThreshold, true);
 				xhr.onreadystatechange = function () {
 					if(xhr.readyState == 4 && xhr.status == 200) {
                         var result = JSON.parse(xhr.responseText);
 
-                        //draw graph
-                        graph = result.graphResult;
-					    drawBundledEdge(blue);
+                        // draw the triangulation
+                        var constraintEdges = result.constrainedEdgeList;
+                        for (var i = 0; i< constraintEdges.length; i++){
 
-                        //draw mesh
-					    if(drawMeshOption){
-                            var constraintEdges = result.constrainedEdgeList;
-                            for (var i = 0; i< constraintEdges.length; i++){
+                            var oneConstraintEdge = constraintEdges[i];
 
-                                var oneConstraintEdge = constraintEdges[i];
+                            var lat1 = oneConstraintEdge.from.centerLocation.latitude;
+                            var lng1 = oneConstraintEdge.from.centerLocation.longitude;
+                            var lat2 = oneConstraintEdge.to.centerLocation.latitude;
+                            var lng2 = oneConstraintEdge.to.centerLocation.longitude;
 
-                                var lat1 = oneConstraintEdge.from.centerLocation.latitude;
-                                var lng1 = oneConstraintEdge.from.centerLocation.longitude;
-                                var lat2 = oneConstraintEdge.to.centerLocation.latitude;
-                                var lng2 = oneConstraintEdge.to.centerLocation.longitude;
+                            var pathCoords = [
+                                {lat: lat1, lng: lng1},
+                                {lat: lat2, lng: lng2}
+                            ];
 
-                                var pathCoords = [
-                                    {lat: lat1, lng: lng1},
-                                    {lat: lat2, lng: lng2}
-                                ];
+                            drawOneLine(pathCoords, pink, 0.7, 10);
 
-                                drawOneLine(pathCoords, pink, 0.7, 10);
+                            var pos = new google.maps.LatLng(oneConstraintEdge.subNodes[0].centerLocation.latitude, oneConstraintEdge.subNodes[0].centerLocation.longitude);
+                            var label = oneConstraintEdge.subNodes[0].id;
+                            addMarker(pos, label, blue_dot);
+                        }
 
-                                var pos = new google.maps.LatLng(oneConstraintEdge.subNodes[0].centerLocation.latitude, oneConstraintEdge.subNodes[0].centerLocation.longitude);
-                                var label = oneConstraintEdge.subNodes[0].id;
-                                addMarker(pos, label, blue_dot);
-                            }
-					    }
+                      var regions = result.regionGridList;
+                      for(var i = 0; i< regions.length; i++){
 
-                        var regions = result.regionGridList;
-                        for(var i = 0; i< regions.length; i++){
+                        var region = regions[i];
 
-                            var region = regions[i];
+                        var pos = new google.maps.LatLng(region.midPoint.latitude, region.midPoint.longitude);
+                        var label = i+":"+ region.averageDominantAngle;
+                        addMarker(pos, label, green_dot);
 
-                            if (drawLabelsOption){
-                                var pos = new google.maps.LatLng(region.midPoint.latitude, region.midPoint.longitude);
-                                var label = i+":"+ region.averageDominantAngle;
-                                addMarker(pos, label, green_dot);
+                        var pos = new google.maps.LatLng(region.minus90Intersection.y, region.minus90Intersection.x);
+                        var label = i+":-"
+                        addMarker(pos, label, purple_dot);
 
-                                var pos = new google.maps.LatLng(region.minus90Intersection.y, region.minus90Intersection.x);
-                                var label = i+":-"
-                                addMarker(pos, label, purple_dot);
+                        var pos = new google.maps.LatLng(region.plus90Intersection.y, region.plus90Intersection.x);
+                        var label = i+":+";
+                        addMarker(pos, label, purple_dot);
 
-                                var pos = new google.maps.LatLng(region.plus90Intersection.y, region.plus90Intersection.x);
-                                var label = i+":+";
-                                addMarker(pos, label, purple_dot);
-                            }
+                        var color;
+                        var mod =  i % 5;
 
+                        if (mod == 0) {color =black;}
+                            else if (mod ==1) {color = red;}
+                                else if (mod==2) {color = green;}
+                                    else if (mod==3) {color =blue;}
+                                        else {color =pink;}
 
-                            var color;
-                            var mod =  i % 5;
+                        var gridsInRegion = region.grids;
 
-                            if (mod == 0) {color =black;}
-                                else if (mod ==1) {color = red;}
-                                    else if (mod==2) {color = green;}
-                                        else if (mod==3) {color =blue;}
-                                            else {color =pink;}
+                        for (var j = 0; j< gridsInRegion.length; j++){
 
-                            var gridsInRegion = region.grids;
+                        var bb = gridsInRegion[j].boundingBox;
+                        var midPoint = gridsInRegion[j].midPoint;
+                        var angle = gridsInRegion[j].dominantAngle
 
-                            if (drawTrigRegionsOption){
-                                for (var j = 0; j< gridsInRegion.length; j++){
+						    var lat1 = bb.northWest.latitude;
+						    var lng1 = bb.northWest.longitude;
+						    var lat2 = bb.northEast.latitude;
+						    var lng2 = bb.northEast.longitude;
+						    var lat3 = bb.southEast.latitude;
+						    var lng3 = bb.southEast.longitude;
+						    var lat4 = bb.southWest.latitude;
+						    var lng4 = bb.southWest.longitude;
 
-                                var bb = gridsInRegion[j].boundingBox;
-                                var midPoint = gridsInRegion[j].midPoint;
-                                var angle = gridsInRegion[j].dominantAngle
+						    var boxCoords = [
+                                {lat: lat1, lng: lng1},
+                                {lat: lat2, lng: lng2},
+                                {lat: lat3, lng: lng3},
+                                {lat: lat4, lng: lng4},
+                                {lat: lat1, lng: lng1}
+                            ];
 
-                                    var lat1 = bb.northWest.latitude;
-                                    var lng1 = bb.northWest.longitude;
-                                    var lat2 = bb.northEast.latitude;
-                                    var lng2 = bb.northEast.longitude;
-                                    var lat3 = bb.southEast.latitude;
-                                    var lng3 = bb.southEast.longitude;
-                                    var lat4 = bb.southWest.latitude;
-                                    var lng4 = bb.southWest.longitude;
+                            drawOneLine(boxCoords, color, 1,  2);
 
-                                    var boxCoords = [
-                                        {lat: lat1, lng: lng1},
-                                        {lat: lat2, lng: lng2},
-                                        {lat: lat3, lng: lng3},
-                                        {lat: lat4, lng: lng4},
-                                        {lat: lat1, lng: lng1}
-                                    ];
+                            var position = new google.maps.LatLng(midPoint.latitude, midPoint.longitude);
+                            var label = i + ":" + j +":"+ angle;
 
-                                    drawOneLine(boxCoords, color, 1,  2);
-
-                                    var position = new google.maps.LatLng(midPoint.latitude, midPoint.longitude);
-                                    var label = i + ":" + j +":"+ angle;
-
-                                    addMarker(position,label, yellow_dot);
-                                }
-                            }
-
-                         }
+                            addMarker(position,label, yellow_dot);
+                        }
+                      }
                     }
                 }
   				xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -342,7 +327,7 @@
                             drawTrips();
 					    }else {
 					        graph = response.edgeList;
-					        drawGraph(red);
+					        drawGraph();
 					    }
 					}
 				}
@@ -358,7 +343,7 @@
 			            alert("No graph data loaded");
 			        }else {
 			            initialize();
-			            drawGraph(red);
+			            drawGraph();
 			        }
 			    }else {
 			        if(trips==null){
@@ -387,60 +372,25 @@
                 }
 			}
 
-			function drawBundledEdge(color){
-			    var lineWidthDivider = lineWidthDividerSelector.value;
+			function drawGraph(){
+			    var lineWidthDivider = lineWidthDividerSelector.options[lineWidthDividerSelector.selectedIndex].value;
 
                 for (var i = 0; i< graph.length; i++){
                     var edge = graph[i];
                     var from = edge.from;
                     var to = edge.to;
 
-                    var lat1 = from.centerLocation.latitude;
-                    var lng1 = from.centerLocation.longitude;
-                    var lat2 = to.centerLocation.latitude;
-                    var lng2 = to.centerLocation.longitude;
+                    var lat1 = from.grid.midPoint.latitude;
+                    var lng1 = from.grid.midPoint.longitude;
+                    var lat2 = to.grid.midPoint.latitude;
+                    var lng2 = to.grid.midPoint.longitude;
 
                     var pathCoords = [
                         {lat: lat1, lng: lng1},
                         {lat: lat2, lng: lng2}
                     ];
 
-                    drawOneLine(pathCoords, color, 0.7, edge.weight/lineWidthDivider);
-                }
-			}
-
-			function drawGraph(color){
-			    var lineWidthDivider = lineWidthDividerSelector.value;
-
-                for (var i = 0; i< graph.length; i++){
-                    var edge = graph[i];
-                    var from = edge.from;
-                    var to = edge.to;
-
-                    if (from.grid==null) {
-                        color=blue;
-                        point1=from.centerLocation;
-                    }else {
-                        point1=from.grid.midPoint;
-                    }
-
-                    if (to.grid==null){
-                        point2=to.centerLocation;
-                    }else {
-                        point2=to.grid.midPoint;
-                    }
-
-                    var lat1 = point1.latitude;
-                    var lng1 = point1.longitude;
-                    var lat2 = point2.latitude;
-                    var lng2 = point2.longitude;
-
-                    var pathCoords = [
-                        {lat: lat1, lng: lng1},
-                        {lat: lat2, lng: lng2}
-                    ];
-
-                    drawOneLine(pathCoords, color, 0.7, edge.weight/lineWidthDivider);
+                    drawOneLine(pathCoords, red, 0.7, edge.weight/lineWidthDivider);
                 }
 			}
 
@@ -457,7 +407,6 @@
 			}
 
 		    google.maps.event.addDomListener(window, 'load', initialize)
-
 
 
 </script>
