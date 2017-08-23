@@ -1,15 +1,12 @@
 package models.geography;
 
-import java.awt.geom.Point2D;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.geotools.referencing.GeodeticCalculator;
-
 import models.graph.Edge;
 import models.trip.GeoLocation;
+import utils.GeoCalculationHelper;
 
 public class Grid {
 
@@ -24,20 +21,11 @@ public class Grid {
     this.id = id;
     this.boundingBox = boundingBox;
 
-    this.midPoint = calculateMidpoint(boundingBox);
+    this.midPoint = GeoCalculationHelper.calculateMidpoint(boundingBox);
     angles = new HashMap<>();
   }
 
-  private GeoLocation calculateMidpoint(BoundingBox boundingBox) {
-    GeodeticCalculator calculator = new GeodeticCalculator();
-    calculator.setStartingGeographicPoint(boundingBox.getSouthWest().getLongitude(),
-        boundingBox.getSouthWest().getLatitude());
-    calculator.setDestinationGeographicPoint(boundingBox.getNorthEast().getLongitude(),
-        boundingBox.getNorthEast().getLatitude());
 
-    final List<Point2D> geodeticPath = calculator.getGeodeticPath(1);
-    return new GeoLocation(geodeticPath.get(1).getY(), geodeticPath.get(1).getX());
-  }
 
   public BoundingBox getBoundingBox() {
     return boundingBox;
@@ -84,7 +72,7 @@ public class Grid {
     }
   }
 
-  public Optional<Double> getDominantAngel() {
+  public Optional<Double> getDominantAngle() {
     return dominantAngel;
   }
 

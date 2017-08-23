@@ -245,7 +245,7 @@ public class BoundingBox {
     return isEdgeIntersect(getBoundingBoxPolygonCoords(), line);
   }
 
-  private Coordinate[] getBoundingBoxPolygonCoords() {
+  public Coordinate[] getBoundingBoxPolygonCoords() {
     return new Coordinate[] {southWest.getCoordinate(), southEast.getCoordinate(),
         northEast.getCoordinate(), northWest.getCoordinate(), southWest.getCoordinate()};
   }

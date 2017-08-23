@@ -37,6 +37,8 @@
 
 
 
+
+
     </style>
 </head>
 </head>
@@ -93,6 +95,13 @@
 				zoom: 11
 			};
 
+			var yellow_dot = 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png';
+			var green_dot =  'http://maps.google.com/mapfiles/ms/icons/green-dot.png';
+			var red_dot = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
+		    var blue_dot = 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png';
+		    var purple_dot = 'http://maps.google.com/mapfiles/ms/icons/purple-dot.png';
+
+
 			var generic_image = new google.maps.MarkerImage(
 			    "static/cartoon.png",
 			    null, /* size is determined at runtime */
@@ -130,6 +139,19 @@
                       for(var i = 0; i< regions.length; i++){
 
                         var region = regions[i];
+
+                        var pos = new google.maps.LatLng(region.midPoint.latitude, region.midPoint.longitude);
+                        var label = i+":"+ region.averageDominantAngle;
+                        addMarker(pos, label, green_dot);
+
+                        var pos = new google.maps.LatLng(region.minus90Intersection.y, region.minus90Intersection.x);
+                        var label = i+":-"
+                        addMarker(pos, label, purple_dot);
+
+                        var pos = new google.maps.LatLng(region.plus90Intersection.y, region.plus90Intersection.x);
+                        var label = i+":+";
+                        addMarker(pos, label, purple_dot);
+
                         var color;
                         var mod =  i % 5;
 
@@ -145,7 +167,7 @@
 
                         var bb = gridsInRegion[j].boundingBox;
                         var midPoint = gridsInRegion[j].midPoint;
-                        var angle = gridsInRegion[j].dominantAngel
+                        var angle = gridsInRegion[j].dominantAngle
 
 						    var lat1 = bb.northWest.latitude;
 						    var lng1 = bb.northWest.longitude;
@@ -166,19 +188,25 @@
 
                             drawOneLine(boxCoords, color, 1,  2);
 
-                            var marker = new google.maps.Marker({
-                                position: new google.maps.LatLng(midPoint.latitude, midPoint.longitude),
-                                label: i + ":" + j +":"+ angle,
-                                map: map
-                            });
+                            var position = new google.maps.LatLng(midPoint.latitude, midPoint.longitude);
+                            var label = i + ":" + j +":"+ angle;
 
+                            addMarker(position,label, yellow_dot);
                         }
                       }
-
                     }
                 }
   				xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 				xhr.send("")
+			}
+
+			function addMarker(position, label, icon){
+			    var marker = new google.maps.Marker({
+                    position: position,
+                    label: label,
+                    icon: icon,
+                    map: map
+                });
 			}
 
 			function loadGrids() {
@@ -370,24 +398,6 @@
 			}
 
 		    google.maps.event.addDomListener(window, 'load', initialize)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 </script>
 </body>

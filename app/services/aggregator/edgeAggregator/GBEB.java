@@ -46,6 +46,17 @@ public class GBEB implements EdgeAggregator {
   public void process() {
     findIntersectionsAndDominantAngel();
     mergeRegions();
+
+    generateConstraints();
+  }
+
+  private void generateConstraints() {
+    LOGGER.debug("Constrained-Delaunay triangulation started.");
+
+    regionGridList.stream().forEach(RegionGrid::getMidPoint);
+    regionGridList.stream().forEach(RegionGrid::boundaryIntersections);
+
+    LOGGER.debug("Constrained-Delaunay triangulation finished.");
   }
 
   private void mergeRegions() {
@@ -56,7 +67,7 @@ public class GBEB implements EdgeAggregator {
 
         Grid currentGrid = grids[row][col];
 
-        if (!currentGrid.isMerged() && currentGrid.getDominantAngel().isPresent()) {
+        if (!currentGrid.isMerged() && currentGrid.getDominantAngle().isPresent()) {
           RegionGrid regionGrid = new RegionGrid();
           regionGridList.add(regionGrid);
 
@@ -97,19 +108,15 @@ public class GBEB implements EdgeAggregator {
   }
 
   private boolean shouldMerge(Grid currentGrid, Grid gridToMerge) {
-    return gridToMerge != null && gridToMerge.getDominantAngel().isPresent()
-        && Math.abs(gridToMerge.getDominantAngel().get()
-            - currentGrid.getDominantAngel().get()) <= angularDiffThreshold
+    return gridToMerge != null && gridToMerge.getDominantAngle().isPresent()
+        && Math.abs(gridToMerge.getDominantAngle().get()
+            - currentGrid.getDominantAngle().get()) <= angularDiffThreshold
         && !gridToMerge.isMerged();
   }
 
   private void findIntersectionsAndDominantAngel() {
     for (int row = 0; row < grids[0].length; row++) {
       for (int col = 0; col < grids[0].length; col++) {
-
-        if (row ==10 && col ==0){
-          System.out.println("Stop here");
-        }
 
         LOGGER.debug("Processing grid: " + row + " - " + col);
         Grid grid = grids[row][col];
