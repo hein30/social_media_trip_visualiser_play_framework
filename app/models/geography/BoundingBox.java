@@ -7,6 +7,7 @@ import java.util.List;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.referencing.GeodeticCalculator;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -245,6 +246,7 @@ public class BoundingBox {
     return isEdgeIntersect(getBoundingBoxPolygonCoords(), line);
   }
 
+  @JsonIgnore
   public Coordinate[] getBoundingBoxPolygonCoords() {
     return new Coordinate[] {southWest.getCoordinate(), southEast.getCoordinate(),
         northEast.getCoordinate(), northWest.getCoordinate(), southWest.getCoordinate()};

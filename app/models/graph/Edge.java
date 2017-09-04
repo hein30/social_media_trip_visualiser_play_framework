@@ -19,6 +19,8 @@ public class Edge {
   private String id;
   private Node from;
   private Node to;
+  private String nodeIdFrom;
+  private String nodeIdTo;
   private int weight;
   private double angle;
   private List<Node> subNodes;
@@ -118,5 +120,21 @@ public class Edge {
     }
 
     return lineString;
+  }
+
+  public String getNodeIdFrom() {
+    return nodeIdFrom;
+  }
+
+  public void setNodeIdFrom(String nodeIdFrom) {
+    this.nodeIdFrom = nodeIdFrom;
+  }
+
+  public String getNodeIdTo() {
+    return nodeIdTo;
+  }
+
+  public void setNodeIdTo(String nodeIdTo) {
+    this.nodeIdTo = nodeIdTo;
   }
 }

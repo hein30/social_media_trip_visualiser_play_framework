@@ -1,6 +1,8 @@
 package models.trip;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vividsolutions.jts.geom.Coordinate;
+
 import play.libs.Json;
 
 /**
@@ -41,8 +43,9 @@ public class GeoLocation {
     this.longitude = longitude;
   }
 
-  public Coordinate getCoordinate(){
-      return new Coordinate(longitude, latitude);
+  @JsonIgnore
+  public Coordinate getCoordinate() {
+    return new Coordinate(longitude, latitude);
   }
 
   public GeoLocation clone() {

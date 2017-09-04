@@ -22,6 +22,7 @@ import models.graph.Edge;
 import models.graph.Node;
 import models.trip.GeoLocation;
 import play.Logger;
+import services.aggregator.edgeAggregator.gbeb.DominantAngleCalculator;
 import utils.HaversineCalculator;
 
 /**
@@ -37,8 +38,8 @@ public class GBEB implements EdgeAggregator {
   private List<Edge> delaunayEdges;
   private Grid[][] grids;
   private double angularDiffThreshold;
+  private BundlingParameters parameters;
   private java.lang.Runtime runTime;
-  private int count;
 
   public GBEB(List<Edge> edges) {
     runTime = Runtime.getRuntime();
@@ -56,8 +57,9 @@ public class GBEB implements EdgeAggregator {
     return this;
   }
 
-  public GBEB withAngularDiffThreshold(double threshold) {
-    angularDiffThreshold = threshold;
+  public GBEB withParameters(BundlingParameters parameters) {
+    this.parameters = parameters;
+    angularDiffThreshold = parameters.getAngularDifferenceThreshold();
     return this;
   }
 
@@ -269,8 +271,9 @@ public class GBEB implements EdgeAggregator {
     LOGGER.debug("Grid dominant angle calculation started.");
     long start = System.currentTimeMillis();
 
-    DominantAngleCalculator dominantAngleCalculator = new DominantAngleCalculator(grids, edges);
-    dominantAngleCalculator.calculate();
+    DominantAngleCalculator dominantAngleCalculator =
+        new DominantAngleCalculator(grids, edges, parameters);
+    grids = dominantAngleCalculator.calculate();
 
     LOGGER.debug("Grid dominant angle calculation finished in "
         + ((System.currentTimeMillis() - start) / 1_000) + "s.");
