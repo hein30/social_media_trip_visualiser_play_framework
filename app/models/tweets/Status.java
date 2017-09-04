@@ -6,6 +6,8 @@ import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
 
+import com.flickr4java.flickr.photos.Photo;
+
 import models.trip.GeoLocation;
 import mongo.MorphiaHelper;
 
@@ -30,6 +32,7 @@ public class Status {
   private GeoLocation geoLocation;
   private boolean endPointUsed;
   private boolean startPointUsed;
+  private Source source;
 
   public Status() {
     // default constructor
@@ -41,6 +44,17 @@ public class Status {
     this.screenName = String.valueOf(status.getUser().getScreenName());
     this.createdAt = status.getCreatedAt();
     this.geoLocation = new GeoLocation(status.getGeoLocation());
+    this.source = Source.TWITTER;
+  }
+
+  public Status(Photo photo) {
+    this.id = String.valueOf(photo.getId());
+    this.userId = String.valueOf(photo.getOwner().getId());
+    this.screenName = userId;
+    this.createdAt = photo.getDateTaken();
+    this.geoLocation =
+        new GeoLocation(photo.getGeoData().getLatitude(), photo.getGeoData().getLongitude());
+    this.source = Source.FLICKR;
   }
 
   public void save() {
@@ -101,5 +115,13 @@ public class Status {
 
   public void setStartPointUsed(boolean startPointUsed) {
     this.startPointUsed = startPointUsed;
+  }
+
+  public Source getSource() {
+    return source;
+  }
+
+  public void setSource(Source source) {
+    this.source = source;
   }
 }

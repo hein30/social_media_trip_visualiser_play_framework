@@ -39,6 +39,7 @@ public class TwitterTrip extends Trip {
     setEndPoint(endStatus.getGeoLocation());
     setDistanceInMeter(distance);
     setArea(Area.getAreaForLocation(startStatus.getGeoLocation()));
+    setSource(startStatus.getSource());
   }
 
   @Override

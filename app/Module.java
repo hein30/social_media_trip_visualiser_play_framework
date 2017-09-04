@@ -6,8 +6,8 @@ import actors.twitter.TweetProcessorActor;
 import play.libs.akka.AkkaGuiceSupport;
 import services.ActorsScheduler;
 import services.ApplicationTimer;
+import services.flickr.userNames.FlickrUserNameActor;
 import services.twitter.rest.TwitterRestfulActor;
-import services.twitter.stream.TwitterStreamBot;
 
 /**
  * This class is a Guice module that tells Guice how to bind several different types. This Guice
@@ -23,6 +23,7 @@ public class Module extends AbstractModule implements AkkaGuiceSupport {
   public void configure() {
     bindActor(TweetProcessorActor.class, "tweet-processor-actor");
     bindActor(TwitterRestfulActor.class, "twitter-restful-bot-actor");
+    bindActor(FlickrUserNameActor.class, "flickr-username-actor");
 
     // Use the system clock as the default implementation of Clock
     bind(Clock.class).toInstance(Clock.systemDefaultZone());
@@ -30,9 +31,9 @@ public class Module extends AbstractModule implements AkkaGuiceSupport {
     // application starts.
     bind(ApplicationTimer.class).asEagerSingleton();
 
-    bind(ActorsScheduler.class).asEagerSingleton();
+     bind(ActorsScheduler.class).asEagerSingleton();
     // Start the TwitterStreamBot class
-    bind(TwitterStreamBot.class).asEagerSingleton();
+    // bind(TwitterStreamBot.class).asEagerSingleton();
 
   }
 

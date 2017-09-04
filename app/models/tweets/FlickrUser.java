@@ -42,6 +42,10 @@ public class FlickrUser extends SocialNetworkUser {
     this.minUploadDate = minUploadDate;
   }
 
+  public void incrementPageNumber() {
+    pageNumber++;
+  }
+
   public int getPageNumber() {
     return pageNumber;
   }
