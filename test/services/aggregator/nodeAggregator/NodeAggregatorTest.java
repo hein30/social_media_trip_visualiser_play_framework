@@ -107,12 +107,10 @@ public class NodeAggregatorTest {
     TwitterTrip trip5 = new TwitterTrip(trip5Start, trip5End);
     trips.add(trip5);
 
-
     GeoLocation trip6Start = new GeoLocation(51.55033056, 0.05621944);
     GeoLocation trip6End = new GeoLocation(51.50711486, -0.12731805);
     TwitterTrip trip6 = new TwitterTrip(trip6Start, trip6End);
     trips.add(trip6);
-
 
     GeoLocation trip7Start = new GeoLocation(51.50711486, -0.12731805);
     GeoLocation trip7End = new GeoLocation(51.41666667, -0.03333333);

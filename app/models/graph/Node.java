@@ -26,6 +26,12 @@ public class Node {
     this.centerLocation = grid.getMidPoint();
   }
 
+  public Node(GeoLocation geoLocation, String id) {
+    locations = new ArrayList<>();
+    this.id = id;
+    this.centerLocation = geoLocation;
+  }
+
   public void addStartPoint(GeoLocation start) {
     locations.add(start);
     outgoing++;

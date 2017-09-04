@@ -4,9 +4,21 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.referencing.GeodeticCalculator;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.collect.Lists;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.Polygon;
+
+import models.graph.Edge;
 import models.trip.GeoLocation;
+import models.trip.Trip;
+import play.libs.Json;
 import utils.HaversineCalculator;
 
 /**
@@ -78,6 +90,24 @@ public class BoundingBox {
     this.northWest = northWest;
   }
 
+  public Grid[][] gridsArrays(int numGrids, boolean extendedBox) {
+    Grid[][] gridArray = new Grid[numGrids][numGrids];
+
+    List<List<Grid>> partitionedList =
+        Lists.reverse(Lists.partition(grids(numGrids, extendedBox), numGrids));
+
+    int row = 0;
+    for (List<Grid> rowList : partitionedList) {
+      for (int col = 0; col < rowList.size(); col++) {
+        final Grid grid = rowList.get(col);
+        grid.setId("FixedId: row: " + row + " col: " + col);
+        gridArray[row][col] = grid;
+      }
+      row++;
+    }
+    return gridArray;
+  }
+
   /**
    * Divide this bounding box into grids of specified size.
    * 
@@ -104,7 +134,6 @@ public class BoundingBox {
     double yDistance = getVerticalGridSize(extendedBoundingBox, numGrids);
 
     GeoLocation currentSW = extendedBoundingBox.getSouthWest();
-
 
     for (int row = 0; row < numGrids; row++) {
       GeoLocation newRowSW = getNewGeoLocation(calculator, currentSW, yDistance, 0);
@@ -149,7 +178,8 @@ public class BoundingBox {
       GeoLocation newNE =
           new GeoLocation(currentNE.getLatitude(), newLongitudeCoordinates.getLongitude());
       BoundingBox bb = new BoundingBox(currentSW.clone(), newNE.clone());
-      Grid grid = new Grid("row:" + rowNum + " col:" + col, bb);
+      final String name = "row:" + rowNum + " col:" + +col;
+      Grid grid = new Grid(name, bb);
       grids.add(grid);
 
       currentNE = newNE;
@@ -179,5 +209,50 @@ public class BoundingBox {
     return Math.round(
         HaversineCalculator.getHaverSineDistanceInMeter(box.getNorthWest(), box.getNorthEast())
             / numGrids);
+  }
+
+  public boolean crossBoundary(Edge edge) {
+    return !(this.isLocationInBox(edge.getFrom().getCenterLocation())
+        && this.isLocationInBox(edge.getTo().getCenterLocation())) && isEdgeIntersect(edge);
+  }
+
+  public boolean crossBoundary(Trip trip) {
+    return !(this.isLocationInBox(trip.getStartPoint()) && this.isLocationInBox(trip.getEndPoint()))
+        && isEdgeIntersect(trip);
+  }
+
+  private boolean isEdgeIntersect(Coordinate[] polygonPoints, Coordinate[] linePoints) {
+    GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
+    LinearRing ring = geometryFactory.createLinearRing(polygonPoints);
+    Polygon polygon = geometryFactory.createPolygon(ring, null);
+
+    LineString line = geometryFactory.createLineString(linePoints);
+
+    return polygon.intersects(line);
+  }
+
+  private boolean isEdgeIntersect(Edge edge) {
+
+    Coordinate[] line = new Coordinate[] {edge.getFrom().getCenterLocation().getCoordinate(),
+        edge.getTo().getCenterLocation().getCoordinate()};
+    return isEdgeIntersect(getBoundingBoxPolygonCoords(), line);
+  }
+
+  private boolean isEdgeIntersect(Trip trip) {
+
+    Coordinate[] line =
+        new Coordinate[] {trip.getStartPoint().getCoordinate(), trip.getEndPoint().getCoordinate()};
+
+    return isEdgeIntersect(getBoundingBoxPolygonCoords(), line);
+  }
+
+  @JsonIgnore
+  public Coordinate[] getBoundingBoxPolygonCoords() {
+    return new Coordinate[] {southWest.getCoordinate(), southEast.getCoordinate(),
+        northEast.getCoordinate(), northWest.getCoordinate(), southWest.getCoordinate()};
+  }
+
+  public BoundingBox clone() {
+    return Json.fromJson(Json.toJson(this), BoundingBox.class);
   }
 }

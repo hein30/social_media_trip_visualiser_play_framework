@@ -1,34 +1,24 @@
 package models.geography;
 
-import java.awt.geom.Point2D;
-import java.util.List;
+import java.util.Optional;
 
-import org.geotools.referencing.GeodeticCalculator;
-
+import models.graph.Edge;
 import models.trip.GeoLocation;
+import utils.GeoCalculationHelper;
 
 public class Grid {
 
   private String id;
   private BoundingBox boundingBox;
   private GeoLocation midPoint;
+  private Optional<Double> dominantAngel;
+  private boolean merged;
 
   public Grid(String id, BoundingBox boundingBox) {
     this.id = id;
     this.boundingBox = boundingBox;
 
-    this.midPoint = calculateMidpoint(boundingBox);
-  }
-
-  private GeoLocation calculateMidpoint(BoundingBox boundingBox) {
-    GeodeticCalculator calculator = new GeodeticCalculator();
-    calculator.setStartingGeographicPoint(boundingBox.getSouthWest().getLongitude(),
-        boundingBox.getSouthWest().getLatitude());
-    calculator.setDestinationGeographicPoint(boundingBox.getNorthEast().getLongitude(),
-        boundingBox.getNorthEast().getLatitude());
-
-    final List<Point2D> geodeticPath = calculator.getGeodeticPath(1);
-    return new GeoLocation(geodeticPath.get(1).getY(), geodeticPath.get(1).getX());
+    this.midPoint = GeoCalculationHelper.calculateMidpoint(boundingBox);
   }
 
   public BoundingBox getBoundingBox() {
@@ -53,5 +43,25 @@ public class Grid {
 
   public boolean isPointInside(GeoLocation location) {
     return this.boundingBox.isLocationInBox(location);
+  }
+
+  public boolean crossBoundary(Edge edge) {
+    return this.boundingBox.crossBoundary(edge);
+  }
+
+  public Optional<Double> getDominantAngle() {
+    return dominantAngel;
+  }
+
+  public void setDominantAngel(Optional<Double> dominantAngel) {
+    this.dominantAngel = dominantAngel;
+  }
+
+  public boolean isMerged() {
+    return merged;
+  }
+
+  public void setMerged(boolean merged) {
+    this.merged = merged;
   }
 }

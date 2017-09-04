@@ -16,7 +16,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import actors.twitter.TweetProcessorProtocol;
 import akka.actor.ActorRef;
 import models.geography.Area;
+import models.geography.BoundingBox;
+import models.geography.Grid;
 import models.graph.ResultGraph;
+import models.graph.TriangulationResults;
 import models.trip.TwitterTrip;
 import models.tweets.Status;
 import models.tweets.TwitterUser;
@@ -26,6 +29,8 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import scala.compat.java8.FutureConverters;
 import scala.concurrent.Future;
+import services.aggregator.edgeAggregator.BundlingParameters;
+import services.aggregator.edgeAggregator.GBEB;
 import services.aggregator.nodeAggregator.NodeAggregator;
 import services.twitter.rest.TwitterRestfulActorProtocol;
 
@@ -98,6 +103,41 @@ public class DataController extends Controller {
 
     JsonNode node = Json.toJson(graph);
     return ok(node);
+  }
+
+  public Result aggregateEdges() {
+    List<TwitterTrip> trips = getTwitterTrips();
+    String area = request().queryString().getOrDefault("area", new String[] {"London"})[0];
+    int numGridsForNodeBundling =
+        Integer.parseInt(request().queryString().getOrDefault("numGrids", new String[] {"40"})[0]);
+
+    int numGridsForEdgeBundling = Integer.parseInt(
+        request().queryString().getOrDefault("numGridsEdgeBundling", new String[] {"40"})[0]);
+
+    int angularDifferenceThreshold = Integer.parseInt(
+        request().queryString().getOrDefault("angularDifferenceThreshold", new String[] {"15"})[0]);
+
+    boolean useCache = Boolean
+        .parseBoolean(request().queryString().getOrDefault("useCache", new String[] {"true"})[0]);
+
+    BundlingParameters parameters = new BundlingParameters();
+    parameters.setArea(area);
+    parameters.setNumGridsForEdgeBundling(numGridsForEdgeBundling);
+    parameters.setNumGridsForNodeBundling(numGridsForNodeBundling);
+    parameters.setAngularDifferenceThreshold(angularDifferenceThreshold);
+    parameters.setUseCache(useCache);
+
+    NodeAggregator aggregator = new NodeAggregator();
+    final BoundingBox boundingBox = Area.getAreaForName(area).getBoundingBox();
+    final ResultGraph graph =
+        aggregator.aggregateNodes(boundingBox, numGridsForNodeBundling, false, trips, false);
+
+    GBEB edgeAggregator = new GBEB(graph.getEdgeList());
+    Grid[][] gridArray = boundingBox.gridsArrays(numGridsForEdgeBundling, false);
+    edgeAggregator.withGrids(gridArray);
+    edgeAggregator.withParameters(parameters);
+    edgeAggregator.process();
+    return ok(Json.toJson(new TriangulationResults(edgeAggregator)));
   }
 
   private List<TwitterTrip> getTwitterTrips() {

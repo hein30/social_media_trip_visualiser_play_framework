@@ -12,6 +12,8 @@ import org.junit.Test;
 import com.google.common.collect.Lists;
 
 import models.trip.GeoLocation;
+import models.trip.Trip;
+import models.trip.TwitterTrip;
 
 /**
  * Tests for {@link BoundingBox}.
@@ -88,14 +90,14 @@ public class BoundingBoxTest {
         final BoundingBox rightBox = row.get(i).getBoundingBox();
 
         assertEquals(leftBox.getSouthEast().getLatitude(), rightBox.getSouthWest().getLatitude(),
-            1e-6);
+                1e-6);
         assertEquals(leftBox.getSouthEast().getLongitude(), rightBox.getSouthWest().getLongitude(),
-            1e-6);
+                1e-6);
 
         assertEquals(leftBox.getNorthEast().getLatitude(), rightBox.getNorthWest().getLatitude(),
-            1e-6);
+                1e-6);
         assertEquals(leftBox.getNorthEast().getLongitude(), rightBox.getNorthWest().getLongitude(),
-            1e-6);
+                1e-6);
       }
     }
 
@@ -105,14 +107,38 @@ public class BoundingBoxTest {
       final BoundingBox topBox = rows.get(i).get(0).getBoundingBox();
 
       assertEquals(bottomBox.getNorthWest().getLongitude(), topBox.getSouthWest().getLongitude(),
-          1e-5);
+              1e-5);
       assertEquals(bottomBox.getNorthWest().getLatitude(), topBox.getSouthWest().getLatitude(),
-          1e-5);
+              1e-5);
 
       assertEquals(bottomBox.getNorthEast().getLongitude(), topBox.getSouthEast().getLongitude(),
-          1e-5);
+              1e-5);
       assertEquals(bottomBox.getNorthEast().getLatitude(), topBox.getSouthEast().getLatitude(),
-          1e-5);
+              1e-5);
     }
+  }
+
+  @Test
+  public void testIsEdgeIntersecting() {
+    GeoLocation start = new GeoLocation(51.467199, -3.498076);
+    GeoLocation end = new GeoLocation(51.513587, -3.623046);
+    Trip trip = new TwitterTrip(start, end);
+    assertFalse(londonBox().crossBoundary(trip));
+
+    GeoLocation intersectingStart = new GeoLocation(51.713152, -0.128221);
+    GeoLocation intersectingEnd = new GeoLocation(51.431957, -0.100856);
+    Trip intersectingTrip = new TwitterTrip(intersectingStart, intersectingEnd);
+    assertTrue(londonBox().crossBoundary(intersectingTrip));
+
+    GeoLocation trip3Start = new GeoLocation(51.366380, 0.100238);
+    GeoLocation trip3End = new GeoLocation(51.396414, 0.011162);
+    Trip trip3 = new TwitterTrip(trip3Start, trip3End);
+    assertTrue(londonBox().crossBoundary(trip3));
+
+    // trip that is completely inside bounding box
+    GeoLocation trip4Start = new GeoLocation(51.425152, -0.037984);
+    GeoLocation trip4End = new GeoLocation(51.461999, -0.100935);
+    Trip trip4 = new TwitterTrip(trip4Start, trip4End);
+    assertFalse(londonBox().crossBoundary(trip4));
   }
 }

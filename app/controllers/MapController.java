@@ -7,6 +7,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.gridMap;
 import views.html.map;
+import views.html.triangulation;
 
 /**
  * Created by Hein Min Htike on 7/20/2017.
@@ -21,6 +22,10 @@ public class MapController extends Controller {
     return ok(gridMap.render());
   }
 
+  public Result triangulation(){
+    return ok(triangulation.render());
+  }
+
   public Result grids() {
     String area = request().queryString().getOrDefault("area", new String[] {"LONDON"})[0];
     int numGrids =
@@ -29,5 +34,14 @@ public class MapController extends Controller {
     BoundingBox originalBox = Area.getAreaForName(area).getBoundingBox();
 
     return ok(Json.toJson(originalBox.grids(numGrids, false)));
+  }
+
+  public Result gridsArray(){
+    String area = request().queryString().getOrDefault("area", new String[] {"LONDON"})[0];
+    int numGrids =
+            Integer.parseInt(request().queryString().getOrDefault("numGrids", new String[] {"50"})[0]);
+    BoundingBox originalBox = Area.getAreaForName(area).getBoundingBox();
+
+    return ok(Json.toJson(originalBox.gridsArrays(numGrids, false)));
   }
 }
