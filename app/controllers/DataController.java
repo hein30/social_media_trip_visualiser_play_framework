@@ -11,8 +11,6 @@ import javax.inject.Named;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import actors.twitter.TweetProcessorProtocol;
 import akka.actor.ActorRef;
 import models.geography.Area;
@@ -99,10 +97,7 @@ public class DataController extends Controller {
     NodeAggregator aggregator = new NodeAggregator();
     final ResultGraph graph = aggregator.aggregateNodes(Area.getAreaForName(area).getBoundingBox(),
         numGrids, false, trips, false);
-    graph.stripData();
-
-    JsonNode node = Json.toJson(graph);
-    return ok(node);
+    return ok(Json.toJson(new TriangulationResults(graph)));
   }
 
   public Result aggregateEdges() {

@@ -102,7 +102,7 @@
  	        var angularDifferenceThreshold = document.getElementById("angulardifferenceThreshold");
 
             var nodes;
-            var graph;
+            var edges;
             var trips;
 
 			function initialize() {
@@ -127,7 +127,7 @@
 
                         //draw graph
                         nodes = result.nodeMap
-                        graph = result.graphResult;
+                        edges = result.edges;
 					    drawBundledEdge(blue);
 
                         //draw mesh
@@ -343,7 +343,8 @@
 					        trips = response;
                             drawTrips();
 					    }else {
-					        graph = response.edgeList;
+					        nodes = response.nodeMap;
+					        edges = response.edges;
 					        drawGraph(red);
 					    }
 					}
@@ -356,7 +357,7 @@
 			    var aggregate = aggregateNodesOption.checked;
 
 			    if (aggregate){
-			        if (graph==null){
+			        if (edges==null){
 			            alert("No graph data loaded");
 			        }else {
 			            initialize();
@@ -392,8 +393,8 @@
 			function drawBundledEdge(color){
 			    var lineWidthDivider = lineWidthDividerSelector.value;
 
-                for (var i = 0; i< graph.length; i++){
-                    var edge = graph[i];
+                for (var i = 0; i< edges.length; i++){
+                    var edge = edges[i];
                     var from = nodes[edge.nodeIdFrom];
                     var to =  nodes[edge.nodeIdTo];
 
@@ -414,10 +415,10 @@
 			function drawGraph(color){
 			    var lineWidthDivider = lineWidthDividerSelector.value;
 
-                for (var i = 0; i< graph.length; i++){
-                    var edge = graph[i];
-                    var from = edge.from;
-                    var to = edge.to;
+                for (var i = 0; i< edges.length; i++){
+                    var edge = edges[i];
+                    var from = nodes[edge.nodeIdFrom];
+                    var to = nodes[edge.nodeIdTo];
 
                     if (from.grid==null) {
                         color=blue;
@@ -442,7 +443,7 @@
                         {lat: lat2, lng: lng2}
                     ];
 
-                    drawOneLine(pathCoords, color, 0.7, (edge.weight/lineWidthDivider)+1);
+                    drawOneLine(pathCoords, color, 0.7, (edge.weight/lineWidthDivider));
                 }
 			}
 
