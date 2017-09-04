@@ -101,7 +101,8 @@
  	        var gridSizeEdgeBundling = document.getElementById("gridSizeEdgeBundling");
  	        var angularDifferenceThreshold = document.getElementById("angulardifferenceThreshold");
 
-            var graph;
+            var nodes;
+            var edges;
             var trips;
 
 			function initialize() {
@@ -125,7 +126,8 @@
                         var result = JSON.parse(xhr.responseText);
 
                         //draw graph
-                        graph = result.graphResult;
+                        nodes = result.nodeMap
+                        edges = result.edges;
 					    drawBundledEdge(blue);
 
                         //draw mesh
@@ -341,7 +343,8 @@
 					        trips = response;
                             drawTrips();
 					    }else {
-					        graph = response.edgeList;
+					        nodes = response.nodeMap;
+					        edges = response.edges;
 					        drawGraph(red);
 					    }
 					}
@@ -354,7 +357,7 @@
 			    var aggregate = aggregateNodesOption.checked;
 
 			    if (aggregate){
-			        if (graph==null){
+			        if (edges==null){
 			            alert("No graph data loaded");
 			        }else {
 			            initialize();
@@ -390,10 +393,10 @@
 			function drawBundledEdge(color){
 			    var lineWidthDivider = lineWidthDividerSelector.value;
 
-                for (var i = 0; i< graph.length; i++){
-                    var edge = graph[i];
-                    var from = edge.from;
-                    var to = edge.to;
+                for (var i = 0; i< edges.length; i++){
+                    var edge = edges[i];
+                    var from = nodes[edge.nodeIdFrom];
+                    var to =  nodes[edge.nodeIdTo];
 
                     var lat1 = from.centerLocation.latitude;
                     var lng1 = from.centerLocation.longitude;
@@ -412,10 +415,10 @@
 			function drawGraph(color){
 			    var lineWidthDivider = lineWidthDividerSelector.value;
 
-                for (var i = 0; i< graph.length; i++){
-                    var edge = graph[i];
-                    var from = edge.from;
-                    var to = edge.to;
+                for (var i = 0; i< edges.length; i++){
+                    var edge = edges[i];
+                    var from = nodes[edge.nodeIdFrom];
+                    var to = nodes[edge.nodeIdTo];
 
                     if (from.grid==null) {
                         color=blue;
@@ -440,7 +443,7 @@
                         {lat: lat2, lng: lng2}
                     ];
 
-                    drawOneLine(pathCoords, color, 0.7, edge.weight/lineWidthDivider);
+                    drawOneLine(pathCoords, color, 0.7, (edge.weight/lineWidthDivider));
                 }
 			}
 

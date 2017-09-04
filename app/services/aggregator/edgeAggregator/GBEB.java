@@ -23,6 +23,8 @@ import models.graph.Node;
 import models.trip.GeoLocation;
 import play.Logger;
 import services.aggregator.edgeAggregator.gbeb.DominantAngleCalculator;
+import services.aggregator.edgeAggregator.gbeb.RegionMerger;
+import services.aggregator.edgeAggregator.gbeb.SimpleRegionMerger;
 import utils.HaversineCalculator;
 
 /**
@@ -117,7 +119,6 @@ public class GBEB implements EdgeAggregator {
     LOGGER.debug(
         "Graph building finished in " + ((System.currentTimeMillis() - start) / 1_000) + "s.");
   }
-
 
   private void bundleEdges() {
     LOGGER.debug("Edge bundling started.");
@@ -215,56 +216,10 @@ public class GBEB implements EdgeAggregator {
 
     long start = System.currentTimeMillis();
 
-    for (int row = 0; row < grids[0].length; row++) {
-      for (int col = 0; col < grids[0].length; col++) {
-
-        Grid currentGrid = grids[row][col];
-
-        if (!currentGrid.isMerged() && currentGrid.getDominantAngle().isPresent()) {
-          RegionGrid regionGrid = new RegionGrid();
-          regionGridList.add(regionGrid);
-
-          mergeNeiboringGrids(row, col, currentGrid, regionGrid);
-        }
-      }
-    }
+    RegionMerger regionMerger = new SimpleRegionMerger(grids, parameters);
+    regionGridList = regionMerger.mergeRegions();
 
     LOGGER.debug("Regions merging finished in " + ((System.currentTimeMillis() - start)) + "ms.");
-  }
-
-  private void mergeNeiboringGrids(int row, int col, Grid currentGrid, RegionGrid regionGrid) {
-
-    currentGrid.setMerged(true);
-    regionGrid.addGrid(currentGrid);
-
-    Grid rightGrid = col < grids[0].length - 1 ? grids[row][col + 1] : null;
-    Grid bottomGrid = row < grids[0].length - 1 ? grids[row + 1][col] : null;
-
-    Grid leftGrid = col == 0 ? null : grids[row][col - 1];
-    Grid topGrid = row == 0 ? null : grids[row - 1][col];
-
-    if (shouldMerge(currentGrid, rightGrid)) {
-      mergeNeiboringGrids(row, col + 1, rightGrid, regionGrid);
-    }
-
-    if (shouldMerge(currentGrid, bottomGrid)) {
-      mergeNeiboringGrids(row + 1, col, bottomGrid, regionGrid);
-    }
-
-    if (shouldMerge(currentGrid, leftGrid)) {
-      mergeNeiboringGrids(row, col - 1, leftGrid, regionGrid);
-    }
-
-    if (shouldMerge(currentGrid, topGrid)) {
-      mergeNeiboringGrids(row - 1, col, topGrid, regionGrid);
-    }
-  }
-
-  private boolean shouldMerge(Grid currentGrid, Grid gridToMerge) {
-    return gridToMerge != null && gridToMerge.getDominantAngle().isPresent()
-        && Math.abs(gridToMerge.getDominantAngle().get()
-            - currentGrid.getDominantAngle().get()) <= angularDiffThreshold
-        && !gridToMerge.isMerged();
   }
 
   private void findIntersectionsAndDominantAngel() {
@@ -299,4 +254,11 @@ public class GBEB implements EdgeAggregator {
     return edgeMap;
   }
 
+  public Map<String, Node> getNodeMap() {
+    return nodeMap;
+  }
+
+  public void setNodeMap(Map<String, Node> nodeMap) {
+    this.nodeMap = nodeMap;
+  }
 }

@@ -97,4 +97,8 @@ public class Node {
   public void setAverageLocation(GeoLocation averageLocation) {
     this.averageLocation = averageLocation;
   }
+
+  public LightWeightNode lightWeightNode() {
+    return new LightWeightNode(this);
+  }
 }
