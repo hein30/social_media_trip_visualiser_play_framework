@@ -20,6 +20,7 @@ public class FlickrUserNamesBotFootPrint {
   private ObjectId id;
   private int page;
   private Date minUploadDate;
+  private int numCalls;
 
   public FlickrUserNamesBotFootPrint() {
     page = 1;
@@ -56,10 +57,12 @@ public class FlickrUserNamesBotFootPrint {
   public void increamentDate() {
     minUploadDate = DateUtils.addDays(minUploadDate, 1);
     page = 1;
+    numCalls++;
   }
 
   public void incrementPageNumber() {
     page++;
+    numCalls++;
   }
 
   public ObjectId getId() {
@@ -68,5 +71,13 @@ public class FlickrUserNamesBotFootPrint {
 
   public void setId(ObjectId id) {
     this.id = id;
+  }
+
+  public int getNumCalls() {
+    return numCalls;
+  }
+
+  public void setNumCalls(int numCalls) {
+    this.numCalls = numCalls;
   }
 }

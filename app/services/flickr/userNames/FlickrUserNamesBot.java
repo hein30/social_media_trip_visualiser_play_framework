@@ -2,6 +2,7 @@ package services.flickr.userNames;
 
 import static com.flickr4java.flickr.photos.SearchParameters.DATE_POSTED_ASC;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -47,7 +48,6 @@ public class FlickrUserNamesBot extends FlickrBot {
   public PhotoList<Photo> searchPhotos(SearchParameters params, int perPage, int page)
       throws FlickrException {
     PhotoList<Photo> photos = photosInterface.search(params, perPage, page);
-    System.out.println();
     return photos;
   }
 
@@ -55,18 +55,21 @@ public class FlickrUserNamesBot extends FlickrBot {
 
     FlickrUserNamesBotFootPrint footPrint = getFlickrUserNamesBotFootPrint();
 
-    parameters.setMinUploadDate(footPrint.getMinUploadDate());
-    parameters.setMaxUploadDate(footPrint.getMaxUploadDate());
+    // only search if the current search is before today.
+    if (footPrint.getMinUploadDate().before(new Date())) {
+      parameters.setMinUploadDate(footPrint.getMinUploadDate());
+      parameters.setMaxUploadDate(footPrint.getMaxUploadDate());
 
-    PhotoList<Photo> photos = searchPhotos(parameters, 0, footPrint.getPage());
+      PhotoList<Photo> photos = searchPhotos(parameters, 0, footPrint.getPage());
 
-    final Map<String, List<Photo>> map =
-        photos.stream().collect(Collectors.groupingBy(photo -> photo.getOwner().getId()));
-    map.keySet().forEach(key -> {
-      new FlickrUser(key, coordinates).save();
-    });
+      final Map<String, List<Photo>> map =
+          photos.stream().collect(Collectors.groupingBy(photo -> photo.getOwner().getId()));
+      map.keySet().forEach(key -> {
+        new FlickrUser(key, coordinates).save();
+      });
 
-    updateFootPrint(footPrint, photos.getPages());
+      updateFootPrint(footPrint, photos.getPages());
+    }
   }
 
   private void updateFootPrint(FlickrUserNamesBotFootPrint footPrint, int maxPages) {

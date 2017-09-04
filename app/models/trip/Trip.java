@@ -1,5 +1,6 @@
 package models.trip;
 
+import models.tweets.Source;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
@@ -23,6 +24,7 @@ public abstract class Trip {
   private double distanceInMeter;
   @Indexed
   private Area area;
+  private Source source;
 
   public Trip() {
     // default constructor.
@@ -74,5 +76,13 @@ public abstract class Trip {
 
   public void setArea(Area area) {
     this.area = area;
+  }
+
+  public Source getSource() {
+    return source;
+  }
+
+  public void setSource(Source source) {
+    this.source = source;
   }
 }
