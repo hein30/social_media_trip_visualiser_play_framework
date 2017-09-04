@@ -1,7 +1,6 @@
 package services.aggregator.edgeAggregator;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +23,6 @@ import models.graph.Node;
 import models.trip.GeoLocation;
 import play.Logger;
 import utils.HaversineCalculator;
-import utils.KdeAngle;
 
 /**
  * Geography based edge aggregation
@@ -33,7 +31,6 @@ public class GBEB implements EdgeAggregator {
 
   private static final Logger.ALogger LOGGER = Logger.of(GBEB.class);
   private final Map<String, Edge> edgeMap;
-  int mb = 1024 * 1024;
   private Map<String, Node> nodeMap;
   private List<RegionGrid> regionGridList;
   private List<Edge> edges;
@@ -170,7 +167,9 @@ public class GBEB implements EdgeAggregator {
 
     regionGridList.stream().forEach(regionGrid -> {
       try {
-        constrainedMesh.addConstraintEdge(buildDelaunayEdge(regionGrid));
+        // constrainedMesh.addConstraintEdge(buildDelaunayEdge(regionGrid));
+        constrainedMesh.addPoint(buildDelaunayEdge(regionGrid).getStartPoint());
+        constrainedMesh.addPoint(buildDelaunayEdge(regionGrid).getEndPoint());
       } catch (DelaunayError delaunayError) {
         delaunayError.printStackTrace();
         LOGGER.error("Failed to add constraint for a region.", delaunayError);
@@ -270,31 +269,11 @@ public class GBEB implements EdgeAggregator {
     LOGGER.debug("Grid dominant angle calculation started.");
     long start = System.currentTimeMillis();
 
-    for (int row = 0; row < grids.length; row++) {
-      for (int col = 0; col < grids.length; col++) {
-
-        Grid grid = grids[row][col];
-        calculateDominantAngleForOneGrid(grid);
-      }
-    }
+    DominantAngleCalculator dominantAngleCalculator = new DominantAngleCalculator(grids, edges);
+    dominantAngleCalculator.calculate();
 
     LOGGER.debug("Grid dominant angle calculation finished in "
         + ((System.currentTimeMillis() - start) / 1_000) + "s.");
-  }
-
-  private void calculateDominantAngleForOneGrid(Grid grid) {
-    LOGGER.debug("Processing grid: " + grid.getId());
-    getAllCrossingEdgeAngles(grid);
-    final Map<Double, Integer> entries = grid.getAngles();
-    grid.setDominantAngel(KdeAngle.getDominantDirection(entries));
-  }
-
-  private void getAllCrossingEdgeAngles(Grid grid) {
-    for (Edge edge : edges) {
-      if (grid.crossBoundary(edge)) {
-        grid.addAngle(edge.getAngle(), edge.getWeight());
-      }
-    }
   }
 
   public List<RegionGrid> getRegionGridList() {
