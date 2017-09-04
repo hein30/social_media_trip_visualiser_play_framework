@@ -101,6 +101,7 @@
  	        var gridSizeEdgeBundling = document.getElementById("gridSizeEdgeBundling");
  	        var angularDifferenceThreshold = document.getElementById("angulardifferenceThreshold");
 
+            var nodes;
             var graph;
             var trips;
 
@@ -125,6 +126,7 @@
                         var result = JSON.parse(xhr.responseText);
 
                         //draw graph
+                        nodes = result.nodeMap
                         graph = result.graphResult;
 					    drawBundledEdge(blue);
 
@@ -392,8 +394,8 @@
 
                 for (var i = 0; i< graph.length; i++){
                     var edge = graph[i];
-                    var from = edge.from;
-                    var to = edge.to;
+                    var from = nodes[edge.nodeIdFrom];
+                    var to =  nodes[edge.nodeIdTo];
 
                     var lat1 = from.centerLocation.latitude;
                     var lng1 = from.centerLocation.longitude;
@@ -440,7 +442,7 @@
                         {lat: lat2, lng: lng2}
                     ];
 
-                    drawOneLine(pathCoords, color, 0.7, edge.weight/lineWidthDivider);
+                    drawOneLine(pathCoords, color, 0.7, (edge.weight/lineWidthDivider)+1);
                 }
 			}
 

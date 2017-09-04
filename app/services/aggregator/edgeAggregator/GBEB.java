@@ -254,4 +254,11 @@ public class GBEB implements EdgeAggregator {
     return edgeMap;
   }
 
+  public Map<String, Node> getNodeMap() {
+    return nodeMap;
+  }
+
+  public void setNodeMap(Map<String, Node> nodeMap) {
+    this.nodeMap = nodeMap;
+  }
 }

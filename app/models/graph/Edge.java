@@ -29,6 +29,8 @@ public class Edge {
     this.from = from;
     this.to = to;
     this.id = from.getId() + to.getId();
+    this.nodeIdFrom = from.getId();
+    this.nodeIdTo = to.getId();
     angle = get180Angle();
 
     subNodes = Collections.synchronizedList(new ArrayList<>());
@@ -136,5 +138,9 @@ public class Edge {
 
   public void setNodeIdTo(String nodeIdTo) {
     this.nodeIdTo = nodeIdTo;
+  }
+
+  public LightWeightEdge lightWeightEdge() {
+    return new LightWeightEdge(this);
   }
 }
