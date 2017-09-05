@@ -2,6 +2,7 @@ package services.flickr.userPhotos;
 
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import com.flickr4java.flickr.FlickrException;
@@ -23,14 +24,15 @@ import services.flickr.FlickrBot;
  */
 public class FlickrUserPhotosBot extends FlickrBot {
   private static final Logger.ALogger LOGGER = Logger.of(FlickrUserPhotosBot.class);
-  private static int count;
+  private static AtomicInteger count;
   private static long start;
   private final PeopleInterface peopleInterface;
   private final BoundingBox defaultBox;
+  private boolean running;
 
   public FlickrUserPhotosBot() {
     start = System.currentTimeMillis();
-
+    count = new AtomicInteger(0);
     peopleInterface = buildFlickr().getPeopleInterface();
 
     List<Double> coords = coordinates();
@@ -45,44 +47,58 @@ public class FlickrUserPhotosBot extends FlickrBot {
   public void processUsers() throws FlickrException {
     long startProcess = System.currentTimeMillis();
 
+    resetRateLimitIfNeeded(startProcess);
+
+    // we will start processing only if another process is not running.
+    if (!running) {
+
+      List<FlickrUser> userQuery = MorphiaHelper.getDatastore().createQuery(FlickrUser.class)
+          .field("processed").equal(false).asList();
+
+      LOGGER.info("Flickr user photos bot started. Number of users to process: {}",
+          userQuery.size());
+
+      savePhotosForUsers(userQuery);
+
+      LOGGER.info("Flickr photo bot processing finished. Time taken: {} {}",
+          (System.currentTimeMillis() - startProcess) / 1000, " seconds");
+    }
+  }
+
+  private void resetRateLimitIfNeeded(long startProcess) {
     // reset the counter if time has lapsed for more than an hour.
     if (startProcess - start > 3600000) {
       start = startProcess;
-      count = 0;
+      count.set(0);
     }
-
-    List<FlickrUser> userQuery = MorphiaHelper.getDatastore().createQuery(FlickrUser.class)
-        .field("processed").equal(false).asList();
-
-    LOGGER.info("Flickr user photos bot started. Number of users to process: {}", userQuery.size());
-
-    savePhotosForUsers(userQuery);
-
-    LOGGER.info("Flickr photo bot processing finished. Time taken: {} {}",
-        (System.currentTimeMillis() - startProcess) / 1000, " seconds");
   }
 
   private void savePhotosForUsers(List<FlickrUser> users) throws FlickrException {
-
+    running = true;
     usersLoop: for (FlickrUser user : users) {
       try {
         savePhotosForUser(user);
       } catch (FlickrException e) {
-        LOGGER.error("Error occured while processing user: {}", user.getId(), e);
+        LOGGER.error("Error occurred while processing user: {}", user.getId(), e);
         throw e;
       }
     }
   }
 
   private void savePhotosForUser(FlickrUser user) throws FlickrException {
-    while (!user.isProcessed() && count < 3600) {
+    while (!user.isProcessed() && count.get() < 3600) {
       PhotoList<Photo> photos = peopleInterface.getPhotos(user.getId(), null, null, null, null,
           null, null, null, Sets.newHashSet("date_taken", "geo"), 1000, user.getPageNumber());
-      count++;
+      count.addAndGet(1);
 
       updateUserInformation(user, photos);
 
       savePhotos(photos, user);
+    }
+
+    // if we have exceeded rate limit, we set flag to stop.
+    if (!(count.get() < 3600)) {
+      running = false;
     }
   }
 
