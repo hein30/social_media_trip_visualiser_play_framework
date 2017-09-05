@@ -1,12 +1,13 @@
 package models.trip;
 
-import models.tweets.Source;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
 
 import models.geography.Area;
+import models.tweets.Source;
 import mongo.MorphiaHelper;
+import utils.HaversineCalculator;
 
 /**
  * A data structure representing a trip. To be extended by specific API's trips to include more
@@ -68,6 +69,11 @@ public abstract class Trip {
 
   public void setDistanceInMeter(double distanceInMeter) {
     this.distanceInMeter = distanceInMeter;
+  }
+
+  public void setDistanceInMeter() {
+    this.distanceInMeter =
+        HaversineCalculator.getHaverSineDistanceInMeter(getStartPoint(), getEndPoint());
   }
 
   public Area getArea() {
