@@ -69,7 +69,7 @@ class TwitterRestBot extends TwitterBot {
       try {
         saveTweetsForUser(user);
       } catch (TwitterException e) {
-        LOGGER.error("Error occurred while saving tweet for user: {}", user.getUserName(), e);
+        LOGGER.error("Error occurred while saving tweet for user: {}", user.getUserName());
         break usersLoop;
       } catch (RateLimitException e) {
         LOGGER.info("Rate limit reached. Stopping operations.");
@@ -95,7 +95,7 @@ class TwitterRestBot extends TwitterBot {
 
     } catch (TwitterException e) {
       if (e.getMessage().contains("401") || e.getMessage().contains("404")) {
-        LOGGER.error("Error occurred: ", e);
+        LOGGER.error("Error occurred 401 or 404.");
         user.setNextProcessTime(DateUtils.addDays(new Date(), 2));
         user.update();
       } else {

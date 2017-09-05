@@ -28,6 +28,9 @@ public class NodeAggregator {
   public ResultGraph aggregateNodes(List<Grid> grids, List<? extends Trip> trips,
       boolean isDirected) {
 
+    long start = System.currentTimeMillis();
+    LOGGER.info("Node aggregation started.");
+
     Map<String, Node> nodeMap = new HashMap<>();
     Map<String, Edge> edgeMap = new HashMap<>();
     for (Trip trip : trips) {
@@ -40,10 +43,12 @@ public class NodeAggregator {
 
         updateOrAddEdge(isDirected, nodeMap, edgeMap, trip, startNodeOptional, endNodeOptional);
       else {
-        LOGGER.warn("Out of bound for location or Start and end points in same grid.");
+        LOGGER.debug("Out of bound for location or Start and end points in same grid.");
       }
     }
 
+    LOGGER.info("Node aggreegation finished in : " + (System.currentTimeMillis() - start) / 1000
+        + " seconds.");
     return new ResultGraph(nodeMap, edgeMap, grids);
   }
 
