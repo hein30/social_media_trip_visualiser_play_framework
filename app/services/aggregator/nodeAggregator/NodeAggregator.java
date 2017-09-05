@@ -48,7 +48,7 @@ public class NodeAggregator {
     }
 
     LOGGER.info("Node aggreegation finished in : " + (System.currentTimeMillis() - start) / 1000
-        + " seconds.");
+        + " seconds and number of edges : " + edgeMap.values().size());
     return new ResultGraph(nodeMap, edgeMap, grids);
   }
 
