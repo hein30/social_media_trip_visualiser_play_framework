@@ -5,6 +5,7 @@ import org.mongodb.morphia.annotations.Entity;
 import models.geography.Area;
 import models.tweets.Status;
 import mongo.MorphiaHelper;
+import utils.CoordinateRandomiser;
 
 /**
  * Created by Hein Min Htike on 6/25/2017.
@@ -35,11 +36,15 @@ public class TwitterTrip extends Trip {
     this.endStatus = endStatus;
 
     setId(startStatus.getId() + " " + endStatus.getId());
-    setStartPoint(startStatus.getGeoLocation());
-    setEndPoint(endStatus.getGeoLocation());
-    setDistanceInMeter(distance);
+    setStartPoint(randomiseCoordinate(startStatus.getGeoLocation()));
+    setEndPoint(randomiseCoordinate(endStatus.getGeoLocation()));
+    setDistanceInMeter();
     setArea(Area.getAreaForLocation(startStatus.getGeoLocation()));
     setSource(startStatus.getSource());
+  }
+
+  private GeoLocation randomiseCoordinate(GeoLocation original) {
+    return CoordinateRandomiser.randomise(original, 300, 40);
   }
 
   @Override
