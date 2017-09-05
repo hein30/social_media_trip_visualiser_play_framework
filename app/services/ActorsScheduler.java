@@ -53,9 +53,9 @@ public class ActorsScheduler {
 
   private void scheduleFlickrUserPhotoActor() {
 
-    actorSystem.scheduler().schedule(Duration.create(61, TimeUnit.MINUTES),
+    actorSystem.scheduler().schedule(Duration.create(0, TimeUnit.MINUTES),
 
-        Duration.create(61, TimeUnit.MINUTES),
+        Duration.create(15, TimeUnit.MINUTES),
 
         flickrUserPhotoActor,
 
