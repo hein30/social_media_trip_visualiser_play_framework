@@ -26,13 +26,17 @@ public class FlickrUserPhotosBot extends FlickrBot {
   private static final Logger.ALogger LOGGER = Logger.of(FlickrUserPhotosBot.class);
   private static AtomicInteger count;
   private static long start;
+
+  static {
+    count = new AtomicInteger(0);
+    start = System.currentTimeMillis();
+  }
+
   private final PeopleInterface peopleInterface;
   private final BoundingBox defaultBox;
   private boolean running;
 
   public FlickrUserPhotosBot() {
-    start = System.currentTimeMillis();
-    count = new AtomicInteger(0);
     peopleInterface = buildFlickr().getPeopleInterface();
 
     List<Double> coords = coordinates();
