@@ -39,16 +39,12 @@ public class GBEB implements EdgeAggregator {
   private List<Edge> edges;
   private List<Edge> delaunayEdges;
   private Grid[][] grids;
-  private double angularDiffThreshold;
   private BundlingParameters parameters;
-  private java.lang.Runtime runTime;
 
   public GBEB(List<Edge> edges) {
-    runTime = Runtime.getRuntime();
     this.edges = Collections.synchronizedList(edges);
     delaunayEdges = new ArrayList<>();
 
-    angularDiffThreshold = 15;
     nodeMap = new HashMap<>();
     edgeMap = new HashMap<>();
   }
@@ -61,7 +57,6 @@ public class GBEB implements EdgeAggregator {
 
   public GBEB withParameters(BundlingParameters parameters) {
     this.parameters = parameters;
-    angularDiffThreshold = parameters.getAngularDifferenceThreshold();
     return this;
   }
 

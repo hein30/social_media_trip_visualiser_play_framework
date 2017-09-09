@@ -91,9 +91,21 @@ public class FlickrUserPhotosBot extends FlickrBot {
 
   private void savePhotosForUser(FlickrUser user) throws FlickrException {
     while (!user.isProcessed() && count.get() < 3600) {
-      PhotoList<Photo> photos = peopleInterface.getPhotos(user.getId(), null, null, null, null,
-          null, null, null, Sets.newHashSet("date_taken", "geo"), 1000, user.getPageNumber());
       count.addAndGet(1);
+
+      PhotoList<Photo> photos = null;
+      try {
+        photos = peopleInterface.getPhotos(user.getId(), null, null, null, null, null, null, null,
+            Sets.newHashSet("date_taken", "geo"), 1000, user.getPageNumber());
+      } catch (FlickrException e) {
+        if (e.getErrorMessage().contains("User deleted")) {
+          LOGGER.error("Deleted user", e);
+          user.setProcessed(true);
+          user.update();
+        }
+        throw e;
+      }
+
 
       updateUserInformation(user, photos);
 
