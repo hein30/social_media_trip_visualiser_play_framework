@@ -10,7 +10,7 @@ import java.util.List;
 import org.mongodb.morphia.query.FindOptions;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import models.trip.TwitterTrip;
+import models.trip.SocialMediaTrip;
 import mongo.MorphiaHelper;
 import services.twitter.Node;
 
@@ -23,8 +23,8 @@ public class ToGephi {
 
     final FindOptions options = new FindOptions();
     options.limit(1000);
-    List<TwitterTrip> trips =
-        MorphiaHelper.getDatastore().createQuery(TwitterTrip.class).asList(options);
+    List<SocialMediaTrip> trips =
+        MorphiaHelper.getDatastore().createQuery(SocialMediaTrip.class).asList(options);
 
     try (ByteArrayOutputStream baosNode = new ByteArrayOutputStream();
         OutputStreamWriter oswNode = new OutputStreamWriter(baosNode);

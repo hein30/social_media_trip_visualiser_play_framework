@@ -10,26 +10,26 @@ import utils.CoordinateRandomiser;
 /**
  * Created by Hein Min Htike on 6/25/2017.
  */
-@Entity(value = "twitterTrips")
-public class TwitterTrip extends Trip {
+@Entity(value = "socialMediaTrips")
+public class SocialMediaTrip extends Trip {
   static {
-    MorphiaHelper.ensureIndex(TwitterTrip.class);
+    MorphiaHelper.ensureIndex(SocialMediaTrip.class);
   }
   private Status startStatus;
   private Status endStatus;
 
-  public TwitterTrip() {
+  public SocialMediaTrip() {
     super();
   }
 
-  public TwitterTrip(GeoLocation start, GeoLocation end) {
+  public SocialMediaTrip(GeoLocation start, GeoLocation end) {
     super();
 
     setStartPoint(start);
     setEndPoint(end);
   }
 
-  public TwitterTrip(Status startStatus, Status endStatus, double distance) {
+  public SocialMediaTrip(Status startStatus, Status endStatus, double distance) {
     super();
 
     this.startStatus = startStatus;
@@ -49,7 +49,7 @@ public class TwitterTrip extends Trip {
 
   @Override
   public boolean existsInDatabase() {
-    return MorphiaHelper.getDatastore().get(TwitterTrip.class, getId()) != null;
+    return MorphiaHelper.getDatastore().get(SocialMediaTrip.class, getId()) != null;
   }
 
   public Status getStartStatus() {
