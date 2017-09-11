@@ -18,7 +18,7 @@ import models.geography.BoundingBox;
 import models.geography.Grid;
 import models.graph.ResultGraph;
 import models.graph.TriangulationResults;
-import models.trip.TwitterTrip;
+import models.trip.SocialMediaTrip;
 import models.tweets.Source;
 import models.tweets.Status;
 import models.tweets.TwitterUser;
@@ -66,7 +66,7 @@ public class DataController extends Controller {
     responseBuilder.append(System.lineSeparator());
 
     responseBuilder
-        .append("Total number of twitter trips: " + DS.getCollection(TwitterTrip.class).count());
+        .append("Total number of twitter trips: " + DS.getCollection(SocialMediaTrip.class).count());
     responseBuilder.append(System.lineSeparator());
 
     responseBuilder
@@ -77,7 +77,7 @@ public class DataController extends Controller {
   }
 
   public Result tweetTrips() {
-    List<TwitterTrip> trips = getTwitterTrips();
+    List<SocialMediaTrip> trips = getTwitterTrips();
 
     boolean aggregateNodes = Boolean.parseBoolean(
         request().queryString().getOrDefault("aggregateNodes", new String[] {"false"})[0]);
@@ -90,7 +90,7 @@ public class DataController extends Controller {
   }
 
   private Result aggregatedNodes() {
-    List<TwitterTrip> trips = getTwitterTrips();
+    List<SocialMediaTrip> trips = getTwitterTrips();
     String area = request().queryString().getOrDefault("area", new String[] {"London"})[0];
     int numGrids =
         Integer.parseInt(request().queryString().getOrDefault("numGrids", new String[] {"40"})[0]);
@@ -124,7 +124,7 @@ public class DataController extends Controller {
     parameters.setAngularDifferenceThreshold(angularDifferenceThreshold);
     parameters.setUseCache(useCache);
 
-    List<TwitterTrip> trips = getTwitterTrips();
+    List<SocialMediaTrip> trips = getTwitterTrips();
 
     NodeAggregator aggregator = new NodeAggregator();
     final BoundingBox boundingBox = Area.getAreaForName(area).getBoundingBox();
@@ -139,14 +139,14 @@ public class DataController extends Controller {
     return ok(Json.toJson(new TriangulationResults(edgeAggregator)));
   }
 
-  private List<TwitterTrip> getTwitterTrips() {
+  private List<SocialMediaTrip> getTwitterTrips() {
     boolean detailsRequested = Boolean
         .parseBoolean(request().queryString().getOrDefault("details", new String[] {"false"})[0]);
     String area = request().queryString().getOrDefault("area", new String[] {"London"})[0];
     String source = request().queryString().getOrDefault("source", new String[] {"Twitter"})[0];
 
-    Query<TwitterTrip> tripQuery = createTripQuery(detailsRequested, area, source);
-    List<TwitterTrip> trips;
+    Query<SocialMediaTrip> tripQuery = createTripQuery(detailsRequested, area, source);
+    List<SocialMediaTrip> trips;
     if (detailsRequested) {
       trips = tripQuery.asList();
       response().setHeader("Content-Disposition", "attachment; filename=twitter-trips.json");
@@ -193,8 +193,8 @@ public class DataController extends Controller {
             r -> badRequest("Your request not served as a tweet processor is already running."));
   }
 
-  private Query<TwitterTrip> createTripQuery(boolean detailsRequested, String area, String source) {
-    Query<TwitterTrip> query = MorphiaHelper.getDatastore().createQuery(TwitterTrip.class);
+  private Query<SocialMediaTrip> createTripQuery(boolean detailsRequested, String area, String source) {
+    Query<SocialMediaTrip> query = MorphiaHelper.getDatastore().createQuery(SocialMediaTrip.class);
 
     query.field("area").equal(Area.getAreaForName(area));
 

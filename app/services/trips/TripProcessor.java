@@ -10,7 +10,7 @@ import org.mongodb.morphia.query.Query;
 
 import models.trip.GeoLocation;
 import models.trip.Trip;
-import models.trip.TwitterTrip;
+import models.trip.SocialMediaTrip;
 import models.tweets.Status;
 import mongo.MorphiaHelper;
 import play.Logger;
@@ -64,7 +64,7 @@ class TripProcessor {
       if (distance > 100) {
         updateStatuses(start, end);
 
-        Trip trip = new TwitterTrip(start, end, distance);
+        Trip trip = new SocialMediaTrip(start, end, distance);
         trip.save();
       } else {
         updateStatuses(start, end);
