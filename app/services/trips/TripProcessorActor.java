@@ -1,4 +1,4 @@
-package actors.twitter;
+package services.trips;
 
 import akka.actor.AbstractLoggingActor;
 import akka.actor.Props;
@@ -15,25 +15,25 @@ import scala.runtime.BoxedUnit;
  *
  * @author Hein Min Htike
  */
-public class TweetProcessorActor extends AbstractLoggingActor {
-  private static final Logger.ALogger LOGGER = Logger.of(TweetProcessorActor.class);
+public class TripProcessorActor extends AbstractLoggingActor {
+  private static final Logger.ALogger LOGGER = Logger.of(TripProcessorActor.class);
 
   private final PartialFunction<Object, BoxedUnit> RUNNING;
   private final PartialFunction<Object, BoxedUnit> IDLE;
 
   private int totalRuns;
 
-  public TweetProcessorActor() {
+  public TripProcessorActor() {
 
     RUNNING = ReceiveBuilder
 
-        .match(TweetProcessorProtocol.ActorStatus.class, this::getStatus).build();
+        .match(TripProcessorProtocol.ActorStatus.class, this::getStatus).build();
 
     IDLE = ReceiveBuilder
 
-        .match(TweetProcessorProtocol.RunActor.class, this::runActor)
+        .match(TripProcessorProtocol.RunActor.class, this::runActor)
 
-        .match(TweetProcessorProtocol.ActorStatus.class, this::getStatus).build();
+        .match(TripProcessorProtocol.ActorStatus.class, this::getStatus).build();
 
     // start from idle stage.
     receive(IDLE);
@@ -42,16 +42,16 @@ public class TweetProcessorActor extends AbstractLoggingActor {
   /**
    * Prop factory for this actor.
    *
-   * @return @link {@link Props} for @link {@link TweetProcessorActor}.
+   * @return @link {@link Props} for @link {@link TripProcessorActor}.
    */
   public static Props props() {
-    return Props.create(TweetProcessorActor.class);
+    return Props.create(TripProcessorActor.class);
   }
 
-  private void runActor(TweetProcessorProtocol.RunActor p) {
+  private void runActor(TripProcessorProtocol.RunActor p) {
     totalRuns++;
     getContext().become(RUNNING);
-    LOGGER.info("TweetProcessorActor's runActor method started.");
+    LOGGER.info("TripProcessorActor's runActor method started.");
 
     processTweetsAsyncAndUpdateState(p);
 
@@ -60,17 +60,17 @@ public class TweetProcessorActor extends AbstractLoggingActor {
     }
   }
 
-  private void getStatus(TweetProcessorProtocol.ActorStatus p) {
+  private void getStatus(TripProcessorProtocol.ActorStatus p) {
     LOGGER.debug("Status being asked.");
     if (p.isGetResponse()) {
       sender().tell(totalRuns, self());
     }
   }
 
-  private void processTweetsAsyncAndUpdateState(TweetProcessorProtocol.RunActor p) {
-    Future<TweetProcessorProtocol.RunActor> future = Futures.future(() -> {
-      TweetProcessor processor = new TweetProcessor();
-      processor.startTweetProcessor();
+  private void processTweetsAsyncAndUpdateState(TripProcessorProtocol.RunActor p) {
+    Future<TripProcessorProtocol.RunActor> future = Futures.future(() -> {
+      TripProcessor processor = new TripProcessor();
+      processor.startTripProcessor();
       return p;
     }, getContext().dispatcher());
 

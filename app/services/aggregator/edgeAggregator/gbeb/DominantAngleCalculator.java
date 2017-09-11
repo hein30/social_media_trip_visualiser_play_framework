@@ -1,6 +1,5 @@
 package services.aggregator.edgeAggregator.gbeb;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,11 +51,21 @@ public class DominantAngleCalculator {
       resultGrids = grids;
 
       CACHE.put(cacheKey, resultGrids);
-    } else {
-      Arrays.stream(resultGrids).flatMap(Arrays::stream).forEach(grid -> grid.setMerged(false));
     }
 
-    return resultGrids;
+    return clone(resultGrids);
+  }
+
+  private Grid[][] clone(Grid[][] original) {
+    Grid[][] copy = new Grid[original.length][original.length];
+
+    for (int row = 0; row < original.length; row++) {
+      for (int col = 0; col < original.length; col++) {
+
+        copy[row][col] = original[row][col].clone();
+      }
+    }
+    return copy;
   }
 
   private Grid[][] fetchFromCache(String cacheKey) {
@@ -66,6 +75,7 @@ public class DominantAngleCalculator {
   private String buildCacheKey() {
     StringBuilder builder = new StringBuilder();
     builder.append(parameters.getArea());
+    builder.append(parameters.getSource());
     builder.append(parameters.getNumGridsForEdgeBundling());
     builder.append(parameters.getNumGridsForNodeBundling());
 

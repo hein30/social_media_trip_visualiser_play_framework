@@ -1,4 +1,4 @@
-package actors.twitter;
+package services.trips;
 
 import java.util.Date;
 import java.util.List;
@@ -19,12 +19,12 @@ import utils.HaversineCalculator;
 /**
  * Created by Hein Min Htike on 6/25/2017.
  */
-class TweetProcessor {
+class TripProcessor {
   private static final int TIME_WINDOW = 4;
-  private static final Logger.ALogger LOGGER = Logger.of(TweetProcessor.class);
+  private static final Logger.ALogger LOGGER = Logger.of(TripProcessor.class);
 
   public static void main(String args[]) {
-    new TweetProcessor().startTweetProcessor();
+    new TripProcessor().startTripProcessor();
   }
 
   private static void processTweets(List<Status> statusList) {
@@ -93,8 +93,8 @@ class TweetProcessor {
     return end.getCreatedAt().before(validEndDate);
   }
 
-  public void startTweetProcessor() {
-    LOGGER.info("Tweets processing started.");
+  public void startTripProcessor() {
+    LOGGER.info("Trips processing started.");
 
     long timeStarted = System.currentTimeMillis();
 

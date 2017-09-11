@@ -29,7 +29,6 @@
 <button type="button" onclick="loadTripDataAndDraw()">Load Trips</button>
 <button type="button" onclick="loadGrids()">Load Grids</button>
 <button type="button" onclick="redrawTrips()">Redraw Trips</button>
-<button type="button" onclick="loadGridArray()">Load Grid Array</button>
 <button type="button" onclick="bundleEdges()">Bundle Edges</button>
 
 <label for="gridSizeSelector"> Grid size Node Bundling</label>
@@ -55,6 +54,13 @@
 <select id="areaSelector">
     <option>London</option>
     <option>Cardiff</option>
+</select>
+
+<label for="sourceSelector"> Source</label>
+<select id="sourceSelector">
+    <option>All</option>
+    <option>Twitter</option>
+    <option>Flickr</option>
 </select>
 
 <input type="checkbox" id="checkBoxOption" value="true" checked> Aggregate nodes
@@ -97,6 +103,7 @@
 			var drawMesh = document.getElementById("drawConstraintMesh");
 			var gridSizeSelector = document.getElementById("gridSizeSelector");
             var areaSelector = document.getElementById("areaSelector");
+            var sourceSelector = document.getElementById("sourceSelector");
  	        var lineWidthDividerSelector = document.getElementById("lineWidth");
  	        var gridSizeEdgeBundling = document.getElementById("gridSizeEdgeBundling");
  	        var angularDifferenceThreshold = document.getElementById("angulardifferenceThreshold");
@@ -112,6 +119,7 @@
 			function bundleEdges(){
    		    	var selectedGridSize = gridSizeSelector.options[gridSizeSelector.selectedIndex].value;
        			var selectedArea = areaSelector.options[areaSelector.selectedIndex].value;
+       			var selectedSource = sourceSelector.options[sourceSelector.selectedIndex].value;
        			var selectedGridSizeEdgeBundling = gridSizeEdgeBundling.value;
        			var selectedThreshold = angularDifferenceThreshold.value;
 
@@ -120,7 +128,7 @@
 			    var drawMeshOption = drawMesh.checked;
 
 				var xhr = new XMLHttpRequest();
-				xhr.open("GET", "/tweet/trip/edgeBundle?area=" + selectedArea +"&numGrids=" + selectedGridSize +"&numGridsEdgeBundling=" +selectedGridSizeEdgeBundling +"&angularDifferenceThreshold=" + selectedThreshold, true);
+				xhr.open("GET", "/tweet/trip/edgeBundle?area=" + selectedArea +"&numGrids=" + selectedGridSize +"&numGridsEdgeBundling=" +selectedGridSizeEdgeBundling +"&angularDifferenceThreshold=" + selectedThreshold +"&source=" + selectedSource, true);
 				xhr.onreadystatechange = function () {
 					if(xhr.readyState == 4 && xhr.status == 200) {
                         var result = JSON.parse(xhr.responseText);
@@ -330,9 +338,10 @@
 			    var aggregate = aggregateNodesOption.checked;
 		    	var selectedGridSize = gridSizeSelector.options[gridSizeSelector.selectedIndex].value;
        			var selectedArea = areaSelector.options[areaSelector.selectedIndex].value;
+       			var selectedSource = sourceSelector.options[sourceSelector.selectedIndex].value;
 
 				var xhr = new XMLHttpRequest();
-				xhr.open("GET", "/tweet/trip?aggregateNodes=" + aggregate + "&area=" + selectedArea +"&numGrids=" + selectedGridSize, true);
+				xhr.open("GET", "/tweet/trip?aggregateNodes=" + aggregate + "&area=" + selectedArea +"&numGrids=" + selectedGridSize +"&source="+selectedSource, true);
 				xhr.onreadystatechange = function () {
 
 					if(xhr.readyState == 4 && xhr.status == 200) {
