@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import models.graph.Edge;
 import models.trip.GeoLocation;
+import play.libs.Json;
 import utils.GeoCalculationHelper;
 
 public class Grid {
@@ -13,6 +14,10 @@ public class Grid {
   private GeoLocation midPoint;
   private Optional<Double> dominantAngel;
   private boolean merged;
+
+  public Grid() {
+    // default constructor for json parser
+  }
 
   public Grid(String id, BoundingBox boundingBox) {
     this.id = id;
@@ -63,5 +68,11 @@ public class Grid {
 
   public void setMerged(boolean merged) {
     this.merged = merged;
+  }
+
+  public Grid clone() {
+    Grid temp = Json.fromJson(Json.toJson(this), this.getClass());
+    temp.setDominantAngel(this.dominantAngel);
+    return temp;
   }
 }

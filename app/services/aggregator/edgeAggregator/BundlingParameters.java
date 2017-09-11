@@ -5,6 +5,7 @@ package services.aggregator.edgeAggregator;
  */
 public class BundlingParameters {
   private String area;
+  private String source;
   private int numGridsForNodeBundling;
   private int numGridsForEdgeBundling;
   private int angularDifferenceThreshold;
@@ -48,5 +49,13 @@ public class BundlingParameters {
 
   public void setUseCache(boolean useCache) {
     this.useCache = useCache;
+  }
+
+  public String getSource() {
+    return source;
+  }
+
+  public void setSource(String source) {
+    this.source = source;
   }
 }

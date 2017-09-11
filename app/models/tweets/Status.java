@@ -16,7 +16,7 @@ import mongo.MorphiaHelper;
  *
  * @author Hein Min Htike
  */
-@Entity(value = "twitterStatues")
+@Entity(value = "socialMediaPosts")
 public class Status {
 
   static {

@@ -11,7 +11,7 @@ import javax.inject.Named;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
 
-import actors.twitter.TweetProcessorProtocol;
+import services.trips.TripProcessorProtocol;
 import akka.actor.ActorRef;
 import models.geography.Area;
 import models.geography.BoundingBox;
@@ -19,6 +19,7 @@ import models.geography.Grid;
 import models.graph.ResultGraph;
 import models.graph.TriangulationResults;
 import models.trip.TwitterTrip;
+import models.tweets.Source;
 import models.tweets.Status;
 import models.tweets.TwitterUser;
 import mongo.MorphiaHelper;
@@ -46,7 +47,7 @@ public class DataController extends Controller {
   private final ActorRef twitterResfulActor;
 
   @Inject
-  public DataController(@Named("tweet-processor-actor") ActorRef tweetProcessor,
+  public DataController(@Named("trip-processor-actor") ActorRef tweetProcessor,
       @Named("twitter-restful-bot-actor") ActorRef twitterResfulActor) {
     this.twitterResfulActor = twitterResfulActor;
     this.tweetProcessor = tweetProcessor;
@@ -101,8 +102,8 @@ public class DataController extends Controller {
   }
 
   public Result aggregateEdges() {
-    List<TwitterTrip> trips = getTwitterTrips();
     String area = request().queryString().getOrDefault("area", new String[] {"London"})[0];
+    String source = request().queryString().getOrDefault("source", new String[] {"Twitter"})[0];
     int numGridsForNodeBundling =
         Integer.parseInt(request().queryString().getOrDefault("numGrids", new String[] {"40"})[0]);
 
@@ -117,10 +118,13 @@ public class DataController extends Controller {
 
     BundlingParameters parameters = new BundlingParameters();
     parameters.setArea(area);
+    parameters.setSource(source);
     parameters.setNumGridsForEdgeBundling(numGridsForEdgeBundling);
     parameters.setNumGridsForNodeBundling(numGridsForNodeBundling);
     parameters.setAngularDifferenceThreshold(angularDifferenceThreshold);
     parameters.setUseCache(useCache);
+
+    List<TwitterTrip> trips = getTwitterTrips();
 
     NodeAggregator aggregator = new NodeAggregator();
     final BoundingBox boundingBox = Area.getAreaForName(area).getBoundingBox();
@@ -139,8 +143,9 @@ public class DataController extends Controller {
     boolean detailsRequested = Boolean
         .parseBoolean(request().queryString().getOrDefault("details", new String[] {"false"})[0]);
     String area = request().queryString().getOrDefault("area", new String[] {"London"})[0];
+    String source = request().queryString().getOrDefault("source", new String[] {"Twitter"})[0];
 
-    Query<TwitterTrip> tripQuery = createTripQuery(detailsRequested, area);
+    Query<TwitterTrip> tripQuery = createTripQuery(detailsRequested, area, source);
     List<TwitterTrip> trips;
     if (detailsRequested) {
       trips = tripQuery.asList();
@@ -153,14 +158,14 @@ public class DataController extends Controller {
 
   public CompletionStage<Result> processorStatus() {
     Future<Object> response =
-        ask(tweetProcessor, new TweetProcessorProtocol.ActorStatus(true), 1000);
+        ask(tweetProcessor, new TripProcessorProtocol.ActorStatus(true), 1000);
 
     return FutureConverters.toJava(response)
         .thenApply(r -> ok("Number of runs for tweet processor: " + (int) r));
   }
 
   public CompletionStage<Result> processorRun() {
-    Future<Object> response = ask(tweetProcessor, new TweetProcessorProtocol.RunActor(true), 30000);
+    Future<Object> response = ask(tweetProcessor, new TripProcessorProtocol.RunActor(true), 30000);
     return FutureConverters.toJava(response)
 
         .thenApply(r -> ok("Your are run number: " + (int) r))
@@ -188,10 +193,14 @@ public class DataController extends Controller {
             r -> badRequest("Your request not served as a tweet processor is already running."));
   }
 
-  private Query<TwitterTrip> createTripQuery(boolean detailsRequested, String area) {
+  private Query<TwitterTrip> createTripQuery(boolean detailsRequested, String area, String source) {
     Query<TwitterTrip> query = MorphiaHelper.getDatastore().createQuery(TwitterTrip.class);
 
     query.field("area").equal(Area.getAreaForName(area));
+
+    if (!source.equalsIgnoreCase("All")) {
+      query.field("source").equal(Source.getSourceForName(source));
+    }
 
     // strip off details if not explicitly requested
     if (!detailsRequested) {
@@ -200,6 +209,4 @@ public class DataController extends Controller {
 
     return query;
   }
-
-
 }

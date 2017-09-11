@@ -1,11 +1,11 @@
-package actors.twitter;
+package services.trips;
 
 /**
- * Protocols used by {@link TweetProcessorActor}
+ * Protocols used by {@link TripProcessorActor}
  *
  * @author Hein Min Htike
  */
-public class TweetProcessorProtocol {
+public class TripProcessorProtocol {
 
   public static class ActorStatus {
     private boolean getResponse;

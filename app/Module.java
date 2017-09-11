@@ -2,12 +2,12 @@ import java.time.Clock;
 
 import com.google.inject.AbstractModule;
 
-import actors.twitter.TweetProcessorActor;
 import play.libs.akka.AkkaGuiceSupport;
 import services.ActorsScheduler;
 import services.ApplicationTimer;
 import services.flickr.userNames.FlickrUserNameActor;
 import services.flickr.userPhotos.FlickrUserPhotoActor;
+import services.trips.TripProcessorActor;
 import services.twitter.rest.TwitterRestfulActor;
 import services.twitter.stream.TwitterStreamBot;
 
@@ -23,7 +23,7 @@ public class Module extends AbstractModule implements AkkaGuiceSupport {
 
   @Override
   public void configure() {
-    bindActor(TweetProcessorActor.class, "tweet-processor-actor");
+    bindActor(TripProcessorActor.class, "trip-processor-actor");
     bindActor(TwitterRestfulActor.class, "twitter-restful-bot-actor");
     bindActor(FlickrUserNameActor.class, "flickr-username-actor");
     bindActor(FlickrUserPhotoActor.class, "flickr-userphoto-actor");

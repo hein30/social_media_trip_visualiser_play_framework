@@ -6,13 +6,13 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import actors.twitter.TweetProcessorProtocol;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.duration.Duration;
 import services.flickr.userNames.FlickrUserNameActorProtocol;
 import services.flickr.userPhotos.FlickrUserPhotoActorProtocol;
+import services.trips.TripProcessorProtocol;
 import services.twitter.rest.TwitterRestfulActorProtocol;
 
 /**
@@ -23,26 +23,26 @@ public class ActorsScheduler {
 
   private final ActorSystem actorSystem;
   private final ExecutionContextExecutor exec;
-  private final ActorRef tweetProcessor;
+  private final ActorRef tripProcessor;
   private final ActorRef twitterRestfulActor;
   private final ActorRef flickrUserNameActor;
   private final ActorRef flickrUserPhotoActor;
 
   @Inject
   public ActorsScheduler(ActorSystem actorSystem, ExecutionContextExecutor exec,
-      @Named("tweet-processor-actor") ActorRef tweetProcessor,
+      @Named("trip-processor-actor") ActorRef tripProcessor,
       @Named("twitter-restful-bot-actor") ActorRef twitterRestfulActor,
       @Named("flickr-username-actor") ActorRef flickrUserNameActor,
       @Named("flickr-userphoto-actor") ActorRef flickrUserPhotoActor) {
 
     this.actorSystem = actorSystem;
     this.exec = exec;
-    this.tweetProcessor = tweetProcessor;
+    this.tripProcessor = tripProcessor;
     this.twitterRestfulActor = twitterRestfulActor;
     this.flickrUserNameActor = flickrUserNameActor;
     this.flickrUserPhotoActor = flickrUserPhotoActor;
 
-    scheduleTweetProcessor();
+    scheduleTripProcessor();
 
     scheduleTwitterRestfulActor();
 
@@ -81,14 +81,14 @@ public class ActorsScheduler {
         null);
   }
 
-  private void scheduleTweetProcessor() {
+  private void scheduleTripProcessor() {
     actorSystem.scheduler().schedule(Duration.create(0, TimeUnit.SECONDS),
 
         Duration.create(3, TimeUnit.HOURS),
 
-        tweetProcessor,
+        tripProcessor,
 
-        new TweetProcessorProtocol.RunActor(false),
+        new TripProcessorProtocol.RunActor(false),
 
         actorSystem.dispatcher(),
 
