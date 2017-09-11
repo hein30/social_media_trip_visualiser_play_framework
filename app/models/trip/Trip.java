@@ -15,7 +15,7 @@ import utils.HaversineCalculator;
  *
  * @author Hein Min Htike
  */
-@Entity(value = "genericTrips")
+@Entity(value = "odTrips")
 public abstract class Trip {
 
   @Id
