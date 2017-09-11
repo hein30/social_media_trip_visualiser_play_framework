@@ -14,7 +14,7 @@ import mongo.MorphiaHelper;
  *
  * @author Hein Min Htike
  */
-@Entity(value = "odTrips")
+@Entity(value = "genericTrips")
 public abstract class Trip {
 
   @Id
