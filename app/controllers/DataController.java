@@ -11,7 +11,6 @@ import javax.inject.Named;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
 
-import services.trips.TripProcessorProtocol;
 import akka.actor.ActorRef;
 import models.geography.Area;
 import models.geography.BoundingBox;
@@ -31,6 +30,7 @@ import scala.concurrent.Future;
 import services.aggregator.edgeAggregator.BundlingParameters;
 import services.aggregator.edgeAggregator.GBEB;
 import services.aggregator.nodeAggregator.NodeAggregator;
+import services.trips.TripProcessorProtocol;
 import services.twitter.rest.TwitterRestfulActorProtocol;
 
 
@@ -65,8 +65,8 @@ public class DataController extends Controller {
     responseBuilder.append("Total number of tweets: " + DS.getCollection(Status.class).count());
     responseBuilder.append(System.lineSeparator());
 
-    responseBuilder
-        .append("Total number of twitter trips: " + DS.getCollection(SocialMediaTrip.class).count());
+    responseBuilder.append(
+        "Total number of twitter trips: " + DS.getCollection(SocialMediaTrip.class).count());
     responseBuilder.append(System.lineSeparator());
 
     responseBuilder
@@ -193,7 +193,8 @@ public class DataController extends Controller {
             r -> badRequest("Your request not served as a tweet processor is already running."));
   }
 
-  private Query<SocialMediaTrip> createTripQuery(boolean detailsRequested, String area, String source) {
+  private Query<SocialMediaTrip> createTripQuery(boolean detailsRequested, String area,
+      String source) {
     Query<SocialMediaTrip> query = MorphiaHelper.getDatastore().createQuery(SocialMediaTrip.class);
 
     query.field("area").equal(Area.getAreaForName(area));
@@ -205,6 +206,7 @@ public class DataController extends Controller {
     // strip off details if not explicitly requested
     if (!detailsRequested) {
       query.project("startStatus", false).project("endStatus", false);
+      query.limit(30_000);
     }
 
     return query;
