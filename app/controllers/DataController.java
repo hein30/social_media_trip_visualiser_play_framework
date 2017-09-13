@@ -54,13 +54,6 @@ public class DataController extends Controller {
   }
 
   public Result tweetTotal() {
-    boolean totalTweets = Boolean.parseBoolean(
-        request().queryString().getOrDefault("totalTweets", new String[] {"false"})[0]);
-    boolean totalTrips = Boolean.parseBoolean(
-        request().queryString().getOrDefault("totalTrips", new String[] {"false"})[0]);
-    boolean totalUsers = Boolean.parseBoolean(
-        request().queryString().getOrDefault("totalUsers", new String[] {"false"})[0]);
-
     StringBuilder responseBuilder = new StringBuilder();
     responseBuilder.append("Total number of tweets: " + DS.getCollection(Status.class).count());
     responseBuilder.append(System.lineSeparator());
@@ -142,10 +135,13 @@ public class DataController extends Controller {
   private List<SocialMediaTrip> getTwitterTrips() {
     boolean detailsRequested = Boolean
         .parseBoolean(request().queryString().getOrDefault("details", new String[] {"false"})[0]);
+    boolean aggregateNodes = Boolean.parseBoolean(
+        request().queryString().getOrDefault("aggregateNodes", new String[] {"false"})[0]);
     String area = request().queryString().getOrDefault("area", new String[] {"London"})[0];
     String source = request().queryString().getOrDefault("source", new String[] {"Twitter"})[0];
 
-    Query<SocialMediaTrip> tripQuery = createTripQuery(detailsRequested, area, source);
+    Query<SocialMediaTrip> tripQuery =
+        createTripQuery(detailsRequested, aggregateNodes, area, source);
     List<SocialMediaTrip> trips;
     if (detailsRequested) {
       trips = tripQuery.asList();
@@ -193,8 +189,8 @@ public class DataController extends Controller {
             r -> badRequest("Your request not served as a tweet processor is already running."));
   }
 
-  private Query<SocialMediaTrip> createTripQuery(boolean detailsRequested, String area,
-      String source) {
+  private Query<SocialMediaTrip> createTripQuery(boolean detailsRequested, boolean aggregateNode,
+      String area, String source) {
     Query<SocialMediaTrip> query = MorphiaHelper.getDatastore().createQuery(SocialMediaTrip.class);
 
     query.field("area").equal(Area.getAreaForName(area));
@@ -206,6 +202,9 @@ public class DataController extends Controller {
     // strip off details if not explicitly requested
     if (!detailsRequested) {
       query.project("startStatus", false).project("endStatus", false);
+    }
+
+    if (!aggregateNode) {
       query.limit(30_000);
     }
 
