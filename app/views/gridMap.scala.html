@@ -72,8 +72,12 @@
 <div id="googleMap"></div>
 
 <script type="text/javascript">
-			var mapOptions = {
+			var londonMapOptions = {
 				center: {lat: 51.5074, lng: 0.1278},
+				zoom: 11
+			};
+			var cardiffMapOptions = {
+				center: {lat: 51.481672, lng: -3.180485},
 				zoom: 11
 			};
 
@@ -113,7 +117,16 @@
             var trips;
 
 			function initialize() {
-				map = new google.maps.Map(document.getElementById("googleMap"), mapOptions);
+       			var selectedArea = areaSelector.options[areaSelector.selectedIndex].value;
+                var mapOption;
+
+       			if (selectedArea=='London'){
+       			    mapOption = londonMapOptions;
+       			}else {
+                    mapOption = cardiffMapOptions;
+       			}
+
+				map = new google.maps.Map(document.getElementById("googleMap"), mapOption);
 			}
 
 			function bundleEdges(){
@@ -123,12 +136,13 @@
        			var selectedGridSizeEdgeBundling = gridSizeEdgeBundling.value;
        			var selectedThreshold = angularDifferenceThreshold.value;
 
+			    var aggregate = aggregateNodesOption.checked;
                 var drawLabelsOption = triangulationLabels.checked;
 			    var drawTrigRegionsOption = triangulationRegions.checked;
 			    var drawMeshOption = drawMesh.checked;
 
 				var xhr = new XMLHttpRequest();
-				xhr.open("GET", "/tweet/trip/edgeBundle?area=" + selectedArea +"&numGrids=" + selectedGridSize +"&numGridsEdgeBundling=" +selectedGridSizeEdgeBundling +"&angularDifferenceThreshold=" + selectedThreshold +"&source=" + selectedSource, true);
+				xhr.open("GET", "/tweet/trip/edgeBundle?area=" + selectedArea + "&aggregateNodes=" + aggregate+"&numGrids=" + selectedGridSize +"&numGridsEdgeBundling=" +selectedGridSizeEdgeBundling +"&angularDifferenceThreshold=" + selectedThreshold +"&source=" + selectedSource, true);
 				xhr.onreadystatechange = function () {
 					if(xhr.readyState == 4 && xhr.status == 200) {
                         var result = JSON.parse(xhr.responseText);
@@ -279,54 +293,6 @@
                             ];
 
                             drawOneLine(boxCoords, color, 1,  2);
-						}
-					}
-				}
-				xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-				xhr.send("")
-			}
-
-			function loadGridArray() {
-			    var selectedGridSize = gridSizeSelector.options[gridSizeSelector.selectedIndex].value;
-			    var selectedArea = areaSelector.options[areaSelector.selectedIndex].value;
-
-				var xhr = new XMLHttpRequest();
-				xhr.open("GET", "/gridsArray?area=" + selectedArea +"&numGrids=" + selectedGridSize , true);
-				xhr.onreadystatechange = function () {
-					if(xhr.readyState == 4 && xhr.status == 200) {
-						var grids = JSON.parse(xhr.responseText);
-
-						for (var row = 0; row< selectedGridSize; row++){
-
-						    for ( var col = 0; col< selectedGridSize; col++){
-
-						    var mod = (row + col) % 2;
-						    var color;
-
-                            if (mod ==0){color =black;} else {color = blue;}
-
-                            var bb = grids[row][col].boundingBox;
-
-                            var lat1 = bb.northWest.latitude;
-						    var lng1 = bb.northWest.longitude;
-						    var lat2 = bb.northEast.latitude;
-						    var lng2 = bb.northEast.longitude;
-						    var lat3 = bb.southEast.latitude;
-						    var lng3 = bb.southEast.longitude;
-						    var lat4 = bb.southWest.latitude;
-						    var lng4 = bb.southWest.longitude;
-
-						    var boxCoords = [
-                                {lat: lat1, lng: lng1},
-                                {lat: lat2, lng: lng2},
-                                {lat: lat3, lng: lng3},
-                                {lat: lat4, lng: lng4},
-                                {lat: lat1, lng: lng1}
-                            ];
-
-                            drawOneLine(boxCoords, color, 1,  2);
-
-						    }
 						}
 					}
 				}
