@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.typesafe.config.ConfigFactory;
 
-import models.tweets.TwitterUser;
+import models.socialmedia.TwitterUser;
 import play.Logger;
 import play.libs.Json;
 import twitter4j.StallWarning;
@@ -15,7 +15,7 @@ import twitter4j.StatusListener;
 /**
  * Basic implementation of @link {@link StatusListener}.
  *
- * Simply saves {@link models.tweets.TwitterUser} into database if the users' tweets have geo
+ * Simply saves {@link models.socialmedia.TwitterUser} into database if the users' socialmedia have geo
  * location attached.
  * 
  * @author Hein Min Htike

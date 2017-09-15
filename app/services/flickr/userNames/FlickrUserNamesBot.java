@@ -14,7 +14,7 @@ import com.flickr4java.flickr.photos.PhotosInterface;
 import com.flickr4java.flickr.photos.SearchParameters;
 
 import models.footprints.FlickrUserNamesBotFootPrint;
-import models.tweets.FlickrUser;
+import models.socialmedia.FlickrUser;
 import mongo.MorphiaHelper;
 import services.flickr.FlickrBot;
 

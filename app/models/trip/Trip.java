@@ -5,7 +5,7 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
 
 import models.geography.Area;
-import models.tweets.Source;
+import models.socialmedia.Source;
 import mongo.MorphiaHelper;
 import utils.HaversineCalculator;
 

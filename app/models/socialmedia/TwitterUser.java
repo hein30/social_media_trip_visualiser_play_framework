@@ -1,12 +1,9 @@
-package models.tweets;
+package models.socialmedia;
 
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.mongodb.morphia.annotations.Entity;
-
-import com.google.common.collect.Lists;
 
 import mongo.MorphiaHelper;
 import twitter4j.User;
@@ -22,13 +19,6 @@ public class TwitterUser extends SocialNetworkUser {
 
   public TwitterUser() {
     // default constructor for morphia.
-  }
-
-  public TwitterUser(String id, String screenName, List<Double> pointsList) {
-    setId(id);
-    setUserName(screenName);
-    setBoundingBoxes(buildBoundingBoxes(pointsList));
-    nextProcessTime = new Date();
   }
 
   public TwitterUser(twitter4j.Status status, List<Double> pointsList) {
