@@ -6,9 +6,6 @@ import com.typesafe.config.ConfigFactory;
 
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.index;
-import views.html.map;
-import views.html.gridMap;
 
 /**
  * This controller contains an action to handle HTTP requests to the application's home page.
@@ -24,6 +21,6 @@ public class HomeController extends Controller {
    * <code>GET</code> request with a path of <code>/</code>.
    */
   public Result index() {
-    return ok(index.render("Your new application is ready."));
+    return ok("Your Play server is up and running.");
   }
 }

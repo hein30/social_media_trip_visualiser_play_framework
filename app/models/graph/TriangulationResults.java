@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import models.geography.RegionGrid;
-import services.aggregator.edgeAggregator.GBEB;
+import services.aggregator.edgeAggregator.gbeb.GBEB;
 
 public class TriangulationResults {
 
