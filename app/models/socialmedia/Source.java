@@ -1,4 +1,4 @@
-package models.tweets;
+package models.socialmedia;
 
 /**
  * Created by Hein Min Htike on 7/22/2017.

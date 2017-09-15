@@ -19,9 +19,9 @@ import models.geography.Grid;
 import models.graph.ResultGraph;
 import models.graph.TriangulationResults;
 import models.trip.SocialMediaTrip;
-import models.tweets.Source;
-import models.tweets.Status;
-import models.tweets.TwitterUser;
+import models.socialmedia.Source;
+import models.socialmedia.Status;
+import models.socialmedia.TwitterUser;
 import mongo.MorphiaHelper;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -58,7 +58,7 @@ public class DataController extends Controller {
 
   public Result tweetTotal() {
     StringBuilder responseBuilder = new StringBuilder();
-    responseBuilder.append("Total number of tweets: " + DS.getCollection(Status.class).count());
+    responseBuilder.append("Total number of socialmedia: " + DS.getCollection(Status.class).count());
     responseBuilder.append(System.lineSeparator());
 
     responseBuilder.append(

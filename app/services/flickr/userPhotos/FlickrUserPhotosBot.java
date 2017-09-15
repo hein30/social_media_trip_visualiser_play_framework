@@ -13,8 +13,8 @@ import com.google.common.collect.Sets;
 
 import models.geography.BoundingBox;
 import models.trip.GeoLocation;
-import models.tweets.FlickrUser;
-import models.tweets.Status;
+import models.socialmedia.FlickrUser;
+import models.socialmedia.Status;
 import mongo.MorphiaHelper;
 import play.Logger;
 import services.flickr.FlickrBot;

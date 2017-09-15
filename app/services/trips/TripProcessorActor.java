@@ -11,7 +11,7 @@ import scala.concurrent.Future;
 import scala.runtime.BoxedUnit;
 
 /**
- * An actor class to process tweets and turn them into {@link models.trip.Trip}.
+ * An actor class to process socialmedia and turn them into {@link models.trip.Trip}.
  *
  * @author Hein Min Htike
  */
@@ -75,11 +75,11 @@ public class TripProcessorActor extends AbstractLoggingActor {
     }, getContext().dispatcher());
 
     FutureConverters.toJava(future).thenApply(s -> {
-      LOGGER.info("Processing tweets asynchronously completed.");
+      LOGGER.info("Processing socialmedia asynchronously completed.");
       getContext().become(IDLE);
       return s;
     }).exceptionally(r -> {
-      LOGGER.error("Processing tweets asynchronously ran into problem.", r.getCause());
+      LOGGER.error("Processing socialmedia asynchronously ran into problem.", r.getCause());
       getContext().become(IDLE);
       return null;
     });

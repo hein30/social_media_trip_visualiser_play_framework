@@ -1,4 +1,4 @@
-package models.tweets;
+package models.socialmedia;
 
 import java.util.ArrayList;
 import java.util.List;

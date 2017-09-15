@@ -3,7 +3,7 @@ package models.trip;
 import org.mongodb.morphia.annotations.Entity;
 
 import models.geography.Area;
-import models.tweets.Status;
+import models.socialmedia.Status;
 import mongo.MorphiaHelper;
 import utils.CoordinateRandomiser;
 

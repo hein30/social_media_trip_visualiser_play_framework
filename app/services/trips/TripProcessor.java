@@ -11,7 +11,7 @@ import org.mongodb.morphia.query.Query;
 import models.trip.GeoLocation;
 import models.trip.Trip;
 import models.trip.SocialMediaTrip;
-import models.tweets.Status;
+import models.socialmedia.Status;
 import mongo.MorphiaHelper;
 import play.Logger;
 import utils.HaversineCalculator;

@@ -11,8 +11,8 @@ import com.typesafe.config.ConfigFactory;
 
 import models.geography.BoundingBox;
 import models.trip.GeoLocation;
-import models.tweets.RateLimitException;
-import models.tweets.TwitterUser;
+import models.socialmedia.RateLimitException;
+import models.socialmedia.TwitterUser;
 import mongo.MorphiaHelper;
 import play.Logger;
 import services.twitter.TwitterBot;
@@ -86,7 +86,7 @@ class TwitterRestBot extends TwitterBot {
 
       updateUser(user, allStatuses);
 
-      LOGGER.debug("Saved {} tweets for user: {}", saved, user.getUserName());
+      LOGGER.debug("Saved {} socialmedia for user: {}", saved, user.getUserName());
       final RateLimitStatus rateLimitStatus = allStatuses.getRateLimitStatus();
       if (rateLimitStatus != null && rateLimitStatus.getRemaining() < 1) {
         throw new RateLimitException(
@@ -117,7 +117,7 @@ class TwitterRestBot extends TwitterBot {
     List<Status> statusesToSave = allStatuses.stream().filter(s -> useTweet(s, new TwitterUser()))
         .collect(Collectors.toList());
 
-    statusesToSave.stream().map(models.tweets.Status::new).collect(Collectors.toList())
+    statusesToSave.stream().map(models.socialmedia.Status::new).collect(Collectors.toList())
         .forEach(s -> s.save());
 
     return statusesToSave.size();
@@ -125,7 +125,7 @@ class TwitterRestBot extends TwitterBot {
 
   private ResponseList<Status> getTweets(TwitterUser user) throws TwitterException {
     Paging paging = new Paging();
-    paging.setCount(200); // 200 is maximum number of tweets one can get in a call.
+    paging.setCount(200); // 200 is maximum number of socialmedia one can get in a call.
 
     Optional.ofNullable(user.getLastTweetId())
         .ifPresent(id -> paging.setSinceId(Long.parseLong(id)));
