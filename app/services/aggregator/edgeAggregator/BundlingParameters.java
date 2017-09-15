@@ -6,6 +6,7 @@ package services.aggregator.edgeAggregator;
 public class BundlingParameters {
   private String area;
   private String source;
+  private String bundler;
   private int numGridsForNodeBundling;
   private int numGridsForEdgeBundling;
   private int angularDifferenceThreshold;
@@ -57,5 +58,13 @@ public class BundlingParameters {
 
   public void setSource(String source) {
     this.source = source;
+  }
+
+  public String getBundler() {
+    return bundler;
+  }
+
+  public void setBundler(String bundler) {
+    this.bundler = bundler;
   }
 }
