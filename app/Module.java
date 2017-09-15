@@ -1,10 +1,7 @@
-import java.time.Clock;
-
 import com.google.inject.AbstractModule;
 
 import play.libs.akka.AkkaGuiceSupport;
 import services.ActorsScheduler;
-import services.ApplicationTimer;
 import services.flickr.userNames.FlickrUserNameActor;
 import services.flickr.userPhotos.FlickrUserPhotoActor;
 import services.trips.TripProcessorActor;
@@ -28,17 +25,9 @@ public class Module extends AbstractModule implements AkkaGuiceSupport {
     bindActor(FlickrUserNameActor.class, "flickr-username-actor");
     bindActor(FlickrUserPhotoActor.class, "flickr-userphoto-actor");
 
-
-    // Use the system clock as the default implementation of Clock
-    bind(Clock.class).toInstance(Clock.systemDefaultZone());
-    // Ask Guice to create an instance of ApplicationTimer when the
-    // application starts.
-    bind(ApplicationTimer.class).asEagerSingleton();
-
     bind(ActorsScheduler.class).asEagerSingleton();
     // Start the TwitterStreamBot class
     bind(TwitterStreamBot.class).asEagerSingleton();
-
   }
 
 }

@@ -28,7 +28,7 @@ import play.mvc.Result;
 import scala.compat.java8.FutureConverters;
 import scala.concurrent.Future;
 import services.aggregator.edgeAggregator.BundlingParameters;
-import services.aggregator.edgeAggregator.GBEB;
+import services.aggregator.edgeAggregator.gbeb.GBEB;
 import services.aggregator.nodeAggregator.NodeAggregator;
 import services.trips.TripProcessorProtocol;
 import services.twitter.rest.TwitterRestfulActorProtocol;

@@ -1,4 +1,4 @@
-package services.aggregator.edgeAggregator;
+package services.aggregator.edgeAggregator.gbeb;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,9 +22,8 @@ import models.graph.Edge;
 import models.graph.Node;
 import models.trip.GeoLocation;
 import play.Logger;
-import services.aggregator.edgeAggregator.gbeb.DominantAngleCalculator;
-import services.aggregator.edgeAggregator.gbeb.RegionMerger;
-import services.aggregator.edgeAggregator.gbeb.SimpleRegionMerger;
+import services.aggregator.edgeAggregator.BundlingParameters;
+import services.aggregator.edgeAggregator.EdgeAggregator;
 import utils.HaversineCalculator;
 
 /**

@@ -11,13 +11,6 @@ GET     /triangulationMap           controllers.MapController.triangulation
 GET     /grids                      controllers.MapController.grids
 GET     /gridsArray                 controllers.MapController.gridsArray
 
-# An example controller showing how to use dependency injection
-GET     /count                      controllers.CountController.count
-
-# An example controller showing how to write asynchronous code
-GET     /message                    controllers.AsyncController.message
-GET     /messageSync                controllers.AsyncController.messageSync
-
 GET     /tweet/total                controllers.DataController.tweetTotal
 GET     /tweet/trip                 controllers.DataController.tweetTrips
 GET     /tweet/trip/edgeBundle      controllers.DataController.aggregateEdges
