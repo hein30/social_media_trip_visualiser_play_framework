@@ -2,6 +2,7 @@ package controllers;
 
 import static akka.pattern.Patterns.ask;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 
@@ -28,7 +29,9 @@ import play.mvc.Result;
 import scala.compat.java8.FutureConverters;
 import scala.concurrent.Future;
 import services.aggregator.edgeAggregator.BundlingParameters;
+import services.aggregator.edgeAggregator.gbeb.AdvancedGBEB;
 import services.aggregator.edgeAggregator.gbeb.GBEB;
+import services.aggregator.edgeAggregator.gbeb.SimpleGBEB;
 import services.aggregator.nodeAggregator.NodeAggregator;
 import services.trips.TripProcessorProtocol;
 import services.twitter.rest.TwitterRestfulActorProtocol;
@@ -97,6 +100,8 @@ public class DataController extends Controller {
   public Result aggregateEdges() {
     String area = request().queryString().getOrDefault("area", new String[] {"London"})[0];
     String source = request().queryString().getOrDefault("source", new String[] {"Twitter"})[0];
+    String bundler =
+        request().queryString().getOrDefault("bundler", new String[] {"SimpleGBEB"})[0];
     int numGridsForNodeBundling =
         Integer.parseInt(request().queryString().getOrDefault("numGrids", new String[] {"40"})[0]);
 
@@ -116,20 +121,33 @@ public class DataController extends Controller {
     parameters.setNumGridsForNodeBundling(numGridsForNodeBundling);
     parameters.setAngularDifferenceThreshold(angularDifferenceThreshold);
     parameters.setUseCache(useCache);
-
+    parameters.setBundler(bundler);
     List<SocialMediaTrip> trips = getTwitterTrips();
 
     NodeAggregator aggregator = new NodeAggregator();
     final BoundingBox boundingBox = Area.getAreaForName(area).getBoundingBox();
     final ResultGraph graph =
         aggregator.aggregateNodes(boundingBox, numGridsForNodeBundling, false, trips, false);
-
-    GBEB edgeAggregator = new GBEB(graph.getEdgeList());
-    Grid[][] gridArray = boundingBox.gridsArrays(numGridsForEdgeBundling, false);
-    edgeAggregator.withGrids(gridArray);
-    edgeAggregator.withParameters(parameters);
+    GBEB edgeAggregator =
+        initialiseEdgeBundler(numGridsForEdgeBundling, parameters, boundingBox, graph);
     edgeAggregator.process();
     return ok(Json.toJson(new TriangulationResults(edgeAggregator)));
+  }
+
+  private GBEB initialiseEdgeBundler(int numGridsForEdgeBundling, BundlingParameters parameters,
+      BoundingBox boundingBox, ResultGraph graph) {
+    if (parameters.getBundler().equalsIgnoreCase("SimpleGBEB")) {
+      SimpleGBEB edgeAggregator = new SimpleGBEB(graph.getEdgeList());
+      edgeAggregator.withNodes(new ArrayList<>(graph.getNodeMap().values()));
+
+      return edgeAggregator;
+    } else {
+      AdvancedGBEB edgeAggregator = new AdvancedGBEB(graph.getEdgeList());
+      Grid[][] gridArray = boundingBox.gridsArrays(numGridsForEdgeBundling, false);
+      edgeAggregator.withGrids(gridArray);
+      edgeAggregator.withParameters(parameters);
+      return edgeAggregator;
+    }
   }
 
   private List<SocialMediaTrip> getTwitterTrips() {

@@ -7,20 +7,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.jdelaunay.delaunay.ConstrainedMesh;
-import org.jdelaunay.delaunay.error.DelaunayError;
-import org.jdelaunay.delaunay.geometries.DEdge;
-import org.jdelaunay.delaunay.geometries.DPoint;
-
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
-import models.geography.Grid;
 import models.geography.RegionGrid;
 import models.graph.Edge;
 import models.graph.Node;
 import models.trip.GeoLocation;
+import org.jdelaunay.delaunay.ConstrainedMesh;
+import org.jdelaunay.delaunay.error.DelaunayError;
+import org.jdelaunay.delaunay.geometries.DEdge;
+import org.jdelaunay.delaunay.geometries.DPoint;
 import play.Logger;
 import services.aggregator.edgeAggregator.BundlingParameters;
 import services.aggregator.edgeAggregator.EdgeAggregator;
@@ -29,16 +27,16 @@ import utils.HaversineCalculator;
 /**
  * Geography based edge aggregation
  */
-public class GBEB implements EdgeAggregator {
+public abstract class GBEB implements EdgeAggregator {
 
   private static final Logger.ALogger LOGGER = Logger.of(GBEB.class);
   private final Map<String, Edge> edgeMap;
   private Map<String, Node> nodeMap;
-  private List<RegionGrid> regionGridList;
   private List<Edge> edges;
   private List<Edge> delaunayEdges;
-  private Grid[][] grids;
   private BundlingParameters parameters;
+  private List<RegionGrid> regionGridList;
+
 
   public GBEB(List<Edge> edges) {
     this.edges = Collections.synchronizedList(edges);
@@ -46,29 +44,28 @@ public class GBEB implements EdgeAggregator {
 
     nodeMap = new HashMap<>();
     edgeMap = new HashMap<>();
-  }
-
-  public GBEB withGrids(Grid[][] grids) {
-    this.grids = grids;
-    this.regionGridList = new ArrayList<>();
-    return this;
-  }
-
-  public GBEB withParameters(BundlingParameters parameters) {
-    this.parameters = parameters;
-    return this;
+    regionGridList = new ArrayList<>();
   }
 
   @Override
-  public void process() {
-    findIntersectionsAndDominantAngel();
-    mergeRegions();
-    generateConstraints();
-    bundleEdges();
-    buildGraph();
+  public abstract void process();
+
+  protected void bundleEdges() {
+    LOGGER.debug("Edge bundling started.");
+
+    GeometryFactory factory = new GeometryFactory();
+    AtomicInteger counter = new AtomicInteger();
+
+    long start = System.currentTimeMillis();
+
+    delaunayEdges.parallelStream()
+        .forEach(meshEdge -> generateControlPointAndIntersectWithEdges(factory, counter, meshEdge));
+
+    LOGGER.debug(
+        "Edge bundling finished in " + ((System.currentTimeMillis() - start) / 1_000) + "s.");
   }
 
-  private void buildGraph() {
+  protected void buildGraph() {
     LOGGER.debug("Graph building started.");
     final long start = System.currentTimeMillis();
 
@@ -114,21 +111,6 @@ public class GBEB implements EdgeAggregator {
         "Graph building finished in " + ((System.currentTimeMillis() - start) / 1_000) + "s.");
   }
 
-  private void bundleEdges() {
-    LOGGER.debug("Edge bundling started.");
-
-    GeometryFactory factory = new GeometryFactory();
-    AtomicInteger counter = new AtomicInteger();
-
-    long start = System.currentTimeMillis();
-
-    delaunayEdges.parallelStream()
-        .forEach(meshEdge -> generateControlPointAndIntersectWithEdges(factory, counter, meshEdge));
-
-    LOGGER.debug(
-        "Edge bundling finished in " + ((System.currentTimeMillis() - start) / 1_000) + "s.");
-  }
-
   private void generateControlPointAndIntersectWithEdges(GeometryFactory factory,
       AtomicInteger counter, Edge meshEdge) {
     List<Coordinate> coordinates = new ArrayList<>();
@@ -153,33 +135,26 @@ public class GBEB implements EdgeAggregator {
     intersectingEdges.forEach(intersectingEdge -> intersectingEdge.getSubNodes().add(controlPoint));
   }
 
-  private void generateConstraints() {
-    LOGGER.debug("Constrained-Delaunay triangulation started.");
-    long start = System.currentTimeMillis();
-
-
-    regionGridList.parallelStream().forEach(RegionGrid::generateMidPointAndIntersections);
-
-    ConstrainedMesh constrainedMesh = new ConstrainedMesh();
-
-    regionGridList.stream().forEach(regionGrid -> {
-      try {
-        // constrainedMesh.addConstraintEdge(buildDelaunayEdge(regionGrid));
-        constrainedMesh.addPoint(buildDelaunayEdge(regionGrid).getStartPoint());
-        constrainedMesh.addPoint(buildDelaunayEdge(regionGrid).getEndPoint());
-      } catch (DelaunayError delaunayError) {
-        delaunayError.printStackTrace();
-        LOGGER.error("Failed to add constraint for a region.", delaunayError);
-      }
-    });
-
+  /**
+   * Generate the mesh using input.
+   *
+   * @param constrainedMesh
+   */
+  protected void generateConstrainedMesh(ConstrainedMesh constrainedMesh) {
     try {
       constrainedMesh.forceConstraintIntegrity();
       constrainedMesh.processDelaunay();
     } catch (DelaunayError delaunayError) {
       LOGGER.error("Failed to perform Constrained-Delaunay triangulation.", delaunayError);
     }
+  }
 
+  /**
+   * Process generated deleauny mesh
+   *
+   * @param constrainedMesh
+   */
+  protected void processDelaunayMesh(ConstrainedMesh constrainedMesh) {
     List<DPoint> meshPoints = new ArrayList<>();
     List<Node> meshNodes = new ArrayList<>();
 
@@ -191,42 +166,10 @@ public class GBEB implements EdgeAggregator {
     for (DEdge e : constrainedMesh.getEdges()) {
       Node startNode = meshNodes.get(meshPoints.indexOf(e.getStartPoint()));
       Node endNode = meshNodes.get(meshPoints.indexOf(e.getEndPoint()));
-      delaunayEdges.add(new Edge(startNode, endNode));
+      getDelaunayEdges().add(new Edge(startNode, endNode));
     }
-
-    LOGGER.debug("Constrained-Delaunay triangulation finished in "
-        + (System.currentTimeMillis() - start) + "ms.");
   }
 
-  private DEdge buildDelaunayEdge(RegionGrid regionGrid) throws DelaunayError {
-    return new DEdge(
-        new DPoint(regionGrid.getPlus90Intersection().x, regionGrid.getPlus90Intersection().y, 0),
-        new DPoint(regionGrid.getMinus90Intersection().x, regionGrid.getMinus90Intersection().y,
-            0));
-  }
-
-  private void mergeRegions() {
-    LOGGER.debug("Regions merging started.");
-
-    long start = System.currentTimeMillis();
-
-    RegionMerger regionMerger = new SimpleRegionMerger(grids, parameters);
-    regionGridList = regionMerger.mergeRegions();
-
-    LOGGER.debug("Regions merging finished in " + ((System.currentTimeMillis() - start)) + "ms.");
-  }
-
-  private void findIntersectionsAndDominantAngel() {
-    LOGGER.debug("Grid dominant angle calculation started.");
-    long start = System.currentTimeMillis();
-
-    DominantAngleCalculator dominantAngleCalculator =
-        new DominantAngleCalculator(grids, edges, parameters);
-    grids = dominantAngleCalculator.calculate();
-
-    LOGGER.debug("Grid dominant angle calculation finished in "
-        + ((System.currentTimeMillis() - start) / 1_000) + "s.");
-  }
 
   public List<RegionGrid> getRegionGridList() {
     return regionGridList;
@@ -254,5 +197,21 @@ public class GBEB implements EdgeAggregator {
 
   public void setNodeMap(Map<String, Node> nodeMap) {
     this.nodeMap = nodeMap;
+  }
+
+  public BundlingParameters getParameters() {
+    return parameters;
+  }
+
+  public void setParameters(BundlingParameters parameters) {
+    this.parameters = parameters;
+  }
+
+  public List<Edge> getEdges() {
+    return edges;
+  }
+
+  public void setEdges(List<Edge> edges) {
+    this.edges = edges;
   }
 }
