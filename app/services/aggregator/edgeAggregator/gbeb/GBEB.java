@@ -7,6 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jdelaunay.delaunay.ConstrainedMesh;
+import org.jdelaunay.delaunay.error.DelaunayError;
+import org.jdelaunay.delaunay.geometries.DEdge;
+import org.jdelaunay.delaunay.geometries.DPoint;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -15,10 +20,6 @@ import models.geography.RegionGrid;
 import models.graph.Edge;
 import models.graph.Node;
 import models.trip.GeoLocation;
-import org.jdelaunay.delaunay.ConstrainedMesh;
-import org.jdelaunay.delaunay.error.DelaunayError;
-import org.jdelaunay.delaunay.geometries.DEdge;
-import org.jdelaunay.delaunay.geometries.DPoint;
 import play.Logger;
 import services.aggregator.edgeAggregator.BundlingParameters;
 import services.aggregator.edgeAggregator.EdgeAggregator;
@@ -116,12 +117,17 @@ public abstract class GBEB implements EdgeAggregator {
     List<Coordinate> coordinates = new ArrayList<>();
     List<Edge> intersectingEdges = new ArrayList<>();
     for (Edge edge : edges) {
-      Geometry intersections =
-          meshEdge.getLineString(factory).intersection(edge.getLineString(factory));
+      try {
+        Geometry intersections =
+            meshEdge.getLineString(factory).intersection(edge.getLineString(factory));
 
-      if (intersections.getCoordinates().length == 1) {
-        coordinates.add(intersections.getCoordinates()[0]);
-        intersectingEdges.add(edge);
+        if (intersections.getCoordinates().length == 1) {
+          coordinates.add(intersections.getCoordinates()[0]);
+          intersectingEdges.add(edge);
+        }
+        //catching NPE, intermittently getting this.
+      } catch (RuntimeException e) {
+        LOGGER.error("problem while calculating intersection", e);
       }
     }
 
