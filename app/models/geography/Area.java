@@ -9,7 +9,7 @@ public enum Area {
 
   LONDON("London", new BoundingBox(-0.3515, 51.3849, 0.1483, 51.6723)),
 
-  CARDIFF("Cardiff", new BoundingBox(-3.282382, 51.443575, -3.116437, 51.560906)),
+  CARDIFF("Cardiff", new BoundingBox(-3.400269, 51.370066, -3.084412, 51.629952)),
 
   OTHERS("Others", new BoundingBox(0, 0, 0, 0));
 
