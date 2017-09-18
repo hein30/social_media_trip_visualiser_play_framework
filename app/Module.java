@@ -25,9 +25,9 @@ public class Module extends AbstractModule implements AkkaGuiceSupport {
     bindActor(FlickrUserNameActor.class, "flickr-username-actor");
     bindActor(FlickrUserPhotoActor.class, "flickr-userphoto-actor");
 
-    bind(ActorsScheduler.class).asEagerSingleton();
+    //bind(ActorsScheduler.class).asEagerSingleton();
     // Start the TwitterStreamBot class
-    bind(TwitterStreamBot.class).asEagerSingleton();
+    //bind(TwitterStreamBot.class).asEagerSingleton();
   }
 
 }
